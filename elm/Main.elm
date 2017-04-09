@@ -40,6 +40,7 @@ type alias Model =
     , issueInput : IssuePathInput
     , error : Maybe String
     , flags : ProgramFlags
+    , githubOrg : String
     }
 
 
@@ -91,6 +92,7 @@ type Msg
     | DelIssueCard Int
     | IssueFetched DroppableID (Result Http.Error Issue)
     | IssueRefreshed DroppableID (Result Http.Error Issue)
+    | CloseError
     | WsMessage String
 
 
@@ -113,7 +115,10 @@ init flags =
             , rows = 3
             , issueInput = issueInput ""
             , error = Nothing
-            , flags = flags
+            , flags =
+                flags
+                -- TODO allow to choose what organization (or user) is the issue comming from
+            , githubOrg = "husio"
             }
     in
         ( model, Cmd.none )
@@ -141,6 +146,9 @@ subscriptions model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        CloseError ->
+            ( { model | error = Nothing }, Cmd.none )
+
         WsMessage content ->
             case Json.Decode.decodeString decodeState content of
                 Err msg ->
@@ -179,7 +187,7 @@ update msg model =
 
                 Just ( repo, issueId ) ->
                     -- add to first To Do
-                    ( { model | issueInput = issueInput "" }, fetchGitHubIssue 1 model.flags.githubToken repo issueId )
+                    ( { model | issueInput = issueInput "" }, fetchGitHubIssue 1 model.flags.githubToken model.githubOrg repo issueId )
 
         IssueFetched position (Ok issue) ->
             let
@@ -312,7 +320,10 @@ view model =
                     div [] []
 
                 Just msg ->
-                    div [ class "error" ] [ text msg ]
+                    div [ class "error" ]
+                        [ span [ class "pull-right", onClick CloseError ] [ icon "times" ]
+                        , text msg
+                        ]
     in
         div []
             [ error
@@ -538,11 +549,11 @@ issuePathInfo path =
                         ( str <| Array.get 0 arr, int <| Array.get 1 arr )
 
 
-fetchGitHubIssue : DroppableID -> String -> String -> Int -> Cmd Msg
-fetchGitHubIssue position token repo issueId =
+fetchGitHubIssue : DroppableID -> String -> String -> String -> Int -> Cmd Msg
+fetchGitHubIssue position token organization repo issueId =
     let
         url =
-            "https://api.github.com/repos/opinary/" ++ repo ++ "/issues/" ++ (toString issueId) ++ "?access_token=" ++ token
+            "https://api.github.com/repos/" ++ organization ++ "/" ++ repo ++ "/issues/" ++ (toString issueId) ++ "?access_token=" ++ token
     in
         Http.send (IssueFetched position) (Http.get url decodeIssue)
 

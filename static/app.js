@@ -10256,9 +10256,9 @@ var _user$project$Main$ProgramFlags = F2(
 	function (a, b) {
 		return {githubToken: a, websocketAddress: b};
 	});
-var _user$project$Main$Model = F6(
-	function (a, b, c, d, e, f) {
-		return {cards: a, dragDrop: b, rows: c, issueInput: d, error: e, flags: f};
+var _user$project$Main$Model = F7(
+	function (a, b, c, d, e, f, g) {
+		return {cards: a, dragDrop: b, rows: c, issueInput: d, error: e, flags: f, githubOrg: g};
 	});
 var _user$project$Main$IssuePathInput = F2(
 	function (a, b) {
@@ -10282,7 +10282,8 @@ var _user$project$Main$init = function (flags) {
 		rows: 3,
 		issueInput: _user$project$Main$issueInput(''),
 		error: _elm_lang$core$Maybe$Nothing,
-		flags: flags
+		flags: flags,
+		githubOrg: 'husio'
 	};
 	return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 };
@@ -10379,6 +10380,7 @@ var _user$project$Main$WsMessage = function (a) {
 var _user$project$Main$subscriptions = function (model) {
 	return A2(_elm_lang$websocket$WebSocket$listen, model.flags.websocketAddress, _user$project$Main$WsMessage);
 };
+var _user$project$Main$CloseError = {ctor: 'CloseError'};
 var _user$project$Main$IssueRefreshed = F2(
 	function (a, b) {
 		return {ctor: 'IssueRefreshed', _0: a, _1: b};
@@ -10398,21 +10400,27 @@ var _user$project$Main$IssueFetched = F2(
 	function (a, b) {
 		return {ctor: 'IssueFetched', _0: a, _1: b};
 	});
-var _user$project$Main$fetchGitHubIssue = F4(
-	function (position, token, repo, issueId) {
+var _user$project$Main$fetchGitHubIssue = F5(
+	function (position, token, organization, repo, issueId) {
 		var url = A2(
 			_elm_lang$core$Basics_ops['++'],
-			'https://api.github.com/repos/opinary/',
+			'https://api.github.com/repos/',
 			A2(
 				_elm_lang$core$Basics_ops['++'],
-				repo,
+				organization,
 				A2(
 					_elm_lang$core$Basics_ops['++'],
-					'/issues/',
+					'/',
 					A2(
 						_elm_lang$core$Basics_ops['++'],
-						_elm_lang$core$Basics$toString(issueId),
-						A2(_elm_lang$core$Basics_ops['++'], '?access_token=', token)))));
+						repo,
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							'/issues/',
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								_elm_lang$core$Basics$toString(issueId),
+								A2(_elm_lang$core$Basics_ops['++'], '?access_token=', token)))))));
 		return A2(
 			_elm_lang$http$Http$send,
 			_user$project$Main$IssueFetched(position),
@@ -10422,6 +10430,14 @@ var _user$project$Main$update = F2(
 	function (msg, model) {
 		var _p5 = msg;
 		switch (_p5.ctor) {
+			case 'CloseError':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{error: _elm_lang$core$Maybe$Nothing}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 			case 'WsMessage':
 				var _p6 = A2(_elm_lang$core$Json_Decode$decodeString, _user$project$Main$decodeState, _p5._0);
 				if (_p6.ctor === 'Err') {
@@ -10493,7 +10509,7 @@ var _user$project$Main$update = F2(
 							{
 								issueInput: _user$project$Main$issueInput('')
 							}),
-						_1: A4(_user$project$Main$fetchGitHubIssue, 1, model.flags.githubToken, _p10._0._0, _p10._0._1)
+						_1: A5(_user$project$Main$fetchGitHubIssue, 1, model.flags.githubToken, model.githubOrg, _p10._0._0, _p10._0._1)
 					};
 				}
 			case 'IssueFetched':
@@ -10861,8 +10877,27 @@ var _user$project$Main$view = function (model) {
 				},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p19._0),
-					_1: {ctor: '[]'}
+					_0: A2(
+						_elm_lang$html$Html$span,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('pull-right'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$CloseError),
+								_1: {ctor: '[]'}
+							}
+						},
+						{
+							ctor: '::',
+							_0: _user$project$Main$icon('times'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(_p19._0),
+						_1: {ctor: '[]'}
+					}
 				});
 		}
 	}();

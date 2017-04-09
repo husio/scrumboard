@@ -16,4 +16,4 @@ elm-watch:
 
 
 devserver:
-	STATIC=./static rerun github.com/husio/scrumboard/server
+	DEBUG=true STATIC=./static rerun github.com/husio/scrumboard/server

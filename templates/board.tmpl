@@ -13,13 +13,8 @@
     <script type="text/javascript" src="/static/app.js"></script>
     <script type="text/javascript">
 (function() {
-  var token = localStorage.getItem("ghToken")
-  if (!token) {
-    token = prompt("github token")
-    localStorage.setItem("ghToken", token)
-  }
   var app = Elm.Main.fullscreen({
-    githubToken: token,
+    githubToken: "{{.Account.AccessToken}}",
     websocketAddress: 'ws://' + location.host + '/ws',
   })
 })()
