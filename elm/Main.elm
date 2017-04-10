@@ -3,6 +3,7 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Html.Events.Extra exposing (targetSelectedIndex)
 import Html5.DragDrop as DragDrop
 import Http
 import Json.Decode exposing (field)
@@ -11,7 +12,8 @@ import Regex
 import Array
 import WebSocket
 import Dict
-import Json.Decode.Pipeline
+import GitHub
+import List.Extra
 
 
 columns : List String
@@ -41,6 +43,7 @@ type alias Model =
     , error : Maybe String
     , flags : ProgramFlags
     , githubOrg : String
+    , repositories : List GitHub.Repository
     }
 
 
@@ -92,6 +95,8 @@ type Msg
     | DelIssueCard Int
     | IssueFetched DroppableID (Result Http.Error Issue)
     | IssueRefreshed DroppableID (Result Http.Error Issue)
+    | RepositoriesFetched (Result Http.Error (List GitHub.Repository))
+    | GithubOwnerSelected String
     | CloseError
     | WsMessage String
 
@@ -115,13 +120,15 @@ init flags =
             , rows = 3
             , issueInput = issueInput ""
             , error = Nothing
-            , flags =
-                flags
-                -- TODO allow to choose what organization (or user) is the issue comming from
-            , githubOrg = "husio"
+            , flags = flags
+            , githubOrg = ""
+            , repositories = []
             }
+
+        fetchReposCmd =
+            GitHub.fetchUserRepos flags.githubToken RepositoriesFetched
     in
-        ( model, Cmd.none )
+        ( model, fetchReposCmd )
 
 
 issueInput : String -> IssuePathInput
@@ -148,6 +155,15 @@ update msg model =
     case msg of
         CloseError ->
             ( { model | error = Nothing }, Cmd.none )
+
+        RepositoriesFetched (Ok repositories) ->
+            ( { model | repositories = repositories }, Cmd.none )
+
+        RepositoriesFetched (Err msg) ->
+            ( { model | error = Just (toString msg) }, Cmd.none )
+
+        GithubOwnerSelected name ->
+            ( { model | githubOrg = name }, Cmd.none )
 
         WsMessage content ->
             case Json.Decode.decodeString decodeState content of
@@ -328,7 +344,8 @@ view model =
         div []
             [ error
             , div []
-                [ label [] [ text "Add issue " ]
+                [ label [] [ text "Add issue from " ]
+                , viewGithubOwnerSelector model.repositories
                 , input
                     [ onEnter AddIssue
                     , onInput IssueInputChanged
@@ -337,12 +354,48 @@ view model =
                     , autofocus True
                     ]
                     []
-                , button [ onClick AddIssue, disabled (not model.issueInput.valid) ] [ text "Add issue to the board" ]
+                , button [ onClick AddIssue, disabled (not model.issueInput.valid || model.githubOrg == "") ] [ text "Add issue to the board" ]
                 , div [ class "board" ] (viewHeaders columns :: rows)
                 ]
             , button [ onClick AddRow ] [ text "add row" ]
             , button [ onClick DelRow ] [ text "remove row" ]
             ]
+
+
+viewGithubOwnerSelector : List GitHub.Repository -> Html Msg
+viewGithubOwnerSelector repositories =
+    let
+        names : List String
+        names =
+            List.map .owner repositories
+                |> List.map .login
+                |> List.Extra.unique
+
+        nameByIndex : Maybe Int -> Msg
+        nameByIndex maybeIdx =
+            case maybeIdx of
+                Nothing ->
+                    GithubOwnerSelected ""
+
+                Just idx ->
+                    GithubOwnerSelected
+                        (Array.fromList names
+                            |> Array.get idx
+                            |> Maybe.withDefault ""
+                        )
+
+        selectEvent =
+            on "change"
+                (Json.Decode.map nameByIndex targetSelectedIndex)
+
+        viewOption : String -> Html Msg
+        viewOption name =
+            option [ value name ] [ text name ]
+
+        options =
+            List.map viewOption names
+    in
+        select [ selectEvent ] options
 
 
 onEnter : Msg -> Attribute Msg
@@ -551,11 +604,7 @@ issuePathInfo path =
 
 fetchGitHubIssue : DroppableID -> String -> String -> String -> Int -> Cmd Msg
 fetchGitHubIssue position token organization repo issueId =
-    let
-        url =
-            "https://api.github.com/repos/" ++ organization ++ "/" ++ repo ++ "/issues/" ++ (toString issueId) ++ "?access_token=" ++ token
-    in
-        Http.send (IssueFetched position) (Http.get url decodeIssue)
+    GitHub.fetchIssue token organization repo issueId (IssueFetched position)
 
 
 refreshGithubIssue : DroppableID -> String -> String -> Cmd Msg
@@ -564,37 +613,7 @@ refreshGithubIssue position token cardUrl =
         url =
             cardUrl ++ "?access_token=" ++ token
     in
-        Http.send (IssueRefreshed position) (Http.get url decodeIssue)
-
-
-decodeIssue : Json.Decode.Decoder Issue
-decodeIssue =
-    Json.Decode.Pipeline.decode Issue
-        |> Json.Decode.Pipeline.required "id" Json.Decode.int
-        |> Json.Decode.Pipeline.required "html_url" Json.Decode.string
-        |> Json.Decode.Pipeline.required "title" Json.Decode.string
-        |> Json.Decode.Pipeline.required "state" Json.Decode.string
-        |> Json.Decode.Pipeline.required "comments" Json.Decode.int
-        |> Json.Decode.Pipeline.required "body" Json.Decode.string
-        |> Json.Decode.Pipeline.required "labels" (Json.Decode.list decodeIssueLabel)
-        |> Json.Decode.Pipeline.required "url" Json.Decode.string
-        |> Json.Decode.Pipeline.required "assignees" (Json.Decode.list decodeIssueUser)
-
-
-decodeIssueUser : Json.Decode.Decoder IssueUser
-decodeIssueUser =
-    Json.Decode.map3 IssueUser
-        (field "id" Json.Decode.int)
-        (field "login" Json.Decode.string)
-        (field "avatar_url" Json.Decode.string)
-
-
-decodeIssueLabel : Json.Decode.Decoder IssueLabel
-decodeIssueLabel =
-    Json.Decode.map3 IssueLabel
-        (field "name" Json.Decode.string)
-        (field "color" Json.Decode.string)
-        (field "url" Json.Decode.string)
+        Http.send (IssueRefreshed position) (Http.get url GitHub.decodeIssue)
 
 
 encodeState : Model -> Json.Encode.Value
