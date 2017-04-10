@@ -16,7 +16,7 @@ import (
 func main() {
 	debug := env("DEBUG", "false") == "true"
 	httpPort := env("PORT", "8000")
-	staticPath := env("STATIC", "./static")
+	staticPath := env("STATIC", "./dist")
 	redisUrl := env("REDIS", "redis://localhost:6379/2")
 	templatesPath := env("TEMPLATES", "./templates/**.tmpl")
 	// registered as http://scrumboard.dev:8000 (edit your /etc/hosts)
