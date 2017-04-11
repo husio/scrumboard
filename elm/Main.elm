@@ -55,6 +55,7 @@ type alias IssuePathInput =
 
 type alias Card =
     { position : DroppableID
+    , order : Int
     , issue : Issue
     }
 
@@ -208,7 +209,7 @@ update msg model =
         IssueFetched position (Ok issue) ->
             let
                 card =
-                    Card position issue
+                    Card position 0 issue
 
                 withoutFetched =
                     List.filter (\c -> c.issue.id /= issue.id) model.cards
@@ -227,7 +228,7 @@ update msg model =
         IssueRefreshed position (Ok issue) ->
             let
                 card =
-                    Card position issue
+                    Card position 0 issue
 
                 withoutFetched =
                     List.filter (\c -> c.issue.id /= issue.id) model.cards
@@ -269,24 +270,40 @@ update msg model =
         DragDrop dragMsg ->
             let
                 ( dragModel, result ) =
-                    DragDrop.update dragMsg model.dragDrop
+                    DragDrop.updateSticky dragMsg model.dragDrop
 
-                ( cards, sync ) =
+                ( _, sync ) =
                     case result of
                         Nothing ->
                             ( model.cards, False )
 
                         Just ( dragId, dropId ) ->
-                            ( moveTo dropId dragId model.cards, True )
+                            ( moveCardTo dropId dragId model.cards, True )
+
+                dragId =
+                    DragDrop.getDragId dragModel
+                        |> Maybe.withDefault -1
+
+                dropId =
+                    DragDrop.getDropId dragModel
+                        |> Maybe.withDefault -1
+
+                cards =
+                    moveCardTo dropId dragId model.cards
 
                 m =
-                    { model | dragDrop = dragModel, cards = sortCards cards }
+                    { model
+                        | dragDrop = dragModel
+                        , cards = sortCards cards
+                    }
 
                 cmd =
-                    if sync then
-                        sendStateSync m
-                    else
-                        Cmd.none
+                    case result of
+                        Just _ ->
+                            sendStateSync m
+
+                        Nothing ->
+                            Cmd.none
             in
                 ( m, cmd )
 
@@ -303,11 +320,11 @@ update msg model =
 
 sortCards : List Card -> List Card
 sortCards cards =
-    List.sortBy (\c -> c.issue.id) cards
+    List.sortBy (\c -> c.order) cards
 
 
-moveTo : DroppableID -> DraggableID -> List Card -> List Card
-moveTo position cardId cards =
+moveCardTo : DroppableID -> DraggableID -> List Card -> List Card
+moveCardTo position cardId cards =
     let
         updatePosition c =
             if c.issue.id == cardId then
@@ -324,8 +341,12 @@ view model =
         clen =
             List.length columns
 
+        dragId : Maybe DraggableID
+        dragId =
+            DragDrop.getDragId model.dragDrop
+
         row beginPos =
-            viewRow ( clen * beginPos, clen * beginPos + clen - 1 ) model.cards
+            viewRow ( clen * beginPos, clen * beginPos + clen - 1 ) dragId model.cards
 
         rows =
             List.map row (List.range 0 (model.rows - 1))
@@ -432,8 +453,8 @@ viewHeaders headers =
         div [ class "board-header" ] rows
 
 
-viewRow : ( DroppableID, DroppableID ) -> List Card -> Html Msg
-viewRow ( min, max ) cards =
+viewRow : ( DroppableID, DroppableID ) -> Maybe DraggableID -> List Card -> Html Msg
+viewRow ( min, max ) dragId cards =
     let
         droppableIds : List DroppableID
         droppableIds =
@@ -441,19 +462,19 @@ viewRow ( min, max ) cards =
 
         dropzones : List (Html Msg)
         dropzones =
-            List.map (viewCell cards) droppableIds
+            List.map (viewCell dragId cards) droppableIds
     in
         div [ class "board-row" ] dropzones
 
 
-viewCell : List Card -> DroppableID -> Html Msg
-viewCell cards position =
+viewCell : Maybe DraggableID -> List Card -> DroppableID -> Html Msg
+viewCell dragId cards position =
     let
         contains =
             onlyContained position cards
     in
         div ([ class "board-cell" ] ++ DragDrop.droppable DragDrop position)
-            (List.map viewCard contains)
+            (List.map (viewCard dragId) contains)
 
 
 onlyContained : DraggableID -> List Card -> List Card
@@ -461,11 +482,15 @@ onlyContained position cards =
     List.filter (\c -> c.position == position) cards
 
 
-viewCard : Card -> Html Msg
-viewCard card =
+viewCard : Maybe DraggableID -> Card -> Html Msg
+viewCard dragId card =
     let
         dragattr =
             DragDrop.draggable DragDrop card.issue.id
+
+        -- TODO
+        dropattr =
+            DragDrop.droppable DragDrop card.issue.id
 
         color =
             case List.head card.issue.labels of
@@ -478,8 +503,14 @@ viewCard card =
         css =
             style [ ( "border-left", "6px solid " ++ color ) ]
 
+        highlight =
+            if (Maybe.withDefault 0 dragId) == card.issue.id then
+                class "card-dragged"
+            else
+                class ""
+
         attrs =
-            css :: class "card" :: dragattr
+            highlight :: css :: class "card" :: dragattr
 
         stateClass =
             if card.issue.state == "closed" then

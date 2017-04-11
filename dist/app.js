@@ -11842,7 +11842,7 @@ var _user$project$Main$onEnter = function (msg) {
 		'keydown',
 		A2(_elm_lang$core$Json_Decode$andThen, isEnter, _elm_lang$html$Html_Events$keyCode));
 };
-var _user$project$Main$moveTo = F3(
+var _user$project$Main$moveCardTo = F3(
 	function (position, cardId, cards) {
 		var updatePosition = function (c) {
 			return _elm_lang$core$Native_Utils.eq(c.issue.id, cardId) ? _elm_lang$core$Native_Utils.update(
@@ -11855,7 +11855,7 @@ var _user$project$Main$sortCards = function (cards) {
 	return A2(
 		_elm_lang$core$List$sortBy,
 		function (c) {
-			return c.issue.id;
+			return c.order;
 		},
 		cards);
 };
@@ -11899,9 +11899,9 @@ var _user$project$Main$issueInput = function (value) {
 	}();
 	return A2(_user$project$Main$IssuePathInput, value, valid);
 };
-var _user$project$Main$Card = F2(
-	function (a, b) {
-		return {position: a, issue: b};
+var _user$project$Main$Card = F3(
+	function (a, b, c) {
+		return {position: a, order: b, issue: c};
 	});
 var _user$project$Main$Issue = F9(
 	function (a, b, c, d, e, f, g, h, i) {
@@ -12173,7 +12173,7 @@ var _user$project$Main$update = F2(
 							return !_elm_lang$core$Native_Utils.eq(c.issue.id, _p12.id);
 						},
 						model.cards);
-					var card = A2(_user$project$Main$Card, _p6._0, _p12);
+					var card = A3(_user$project$Main$Card, _p6._0, 0, _p12);
 					var cards = A2(
 						_elm_lang$core$Basics_ops['++'],
 						withoutFetched,
@@ -12213,7 +12213,7 @@ var _user$project$Main$update = F2(
 							return !_elm_lang$core$Native_Utils.eq(c.issue.id, _p13.id);
 						},
 						model.cards);
-					var card = A2(_user$project$Main$Card, _p6._0, _p13);
+					var card = A3(_user$project$Main$Card, _p6._0, 0, _p13);
 					var cards = A2(
 						_elm_lang$core$Basics_ops['++'],
 						withoutFetched,
@@ -12271,7 +12271,7 @@ var _user$project$Main$update = F2(
 					_1: _user$project$Main$sendStateSync(m)
 				};
 			case 'DragDrop':
-				var _p14 = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$update, _p6._0, model.dragDrop);
+				var _p14 = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$updateSticky, _p6._0, model.dragDrop);
 				var dragModel = _p14._0;
 				var result = _p14._1;
 				var _p15 = function () {
@@ -12281,20 +12281,35 @@ var _user$project$Main$update = F2(
 					} else {
 						return {
 							ctor: '_Tuple2',
-							_0: A3(_user$project$Main$moveTo, _p16._0._1, _p16._0._0, model.cards),
+							_0: A3(_user$project$Main$moveCardTo, _p16._0._1, _p16._0._0, model.cards),
 							_1: true
 						};
 					}
 				}();
-				var cards = _p15._0;
 				var sync = _p15._1;
+				var dragId = A2(
+					_elm_lang$core$Maybe$withDefault,
+					-1,
+					_norpan$elm_html5_drag_drop$Html5_DragDrop$getDragId(dragModel));
+				var dropId = A2(
+					_elm_lang$core$Maybe$withDefault,
+					-1,
+					_norpan$elm_html5_drag_drop$Html5_DragDrop$getDropId(dragModel));
+				var cards = A3(_user$project$Main$moveCardTo, dropId, dragId, model.cards);
 				var m = _elm_lang$core$Native_Utils.update(
 					model,
 					{
 						dragDrop: dragModel,
 						cards: _user$project$Main$sortCards(cards)
 					});
-				var cmd = sync ? _user$project$Main$sendStateSync(m) : _elm_lang$core$Platform_Cmd$none;
+				var cmd = function () {
+					var _p17 = result;
+					if (_p17.ctor === 'Just') {
+						return _user$project$Main$sendStateSync(m);
+					} else {
+						return _elm_lang$core$Platform_Cmd$none;
+					}
+				}();
 				return {ctor: '_Tuple2', _0: m, _1: cmd};
 			default:
 				var cards = A2(
@@ -12325,114 +12340,113 @@ var _user$project$Main$AddRow = {ctor: 'AddRow'};
 var _user$project$Main$DragDrop = function (a) {
 	return {ctor: 'DragDrop', _0: a};
 };
-var _user$project$Main$viewCard = function (card) {
-	var assignees = A2(_elm_lang$core$List$map, _user$project$Main$viewAssignee, card.issue.assignees);
-	var labels = A2(_elm_lang$core$List$map, _user$project$Main$viewLabel, card.issue.labels);
-	var stateClass = _elm_lang$core$Native_Utils.eq(card.issue.state, 'closed') ? 'state-closed' : '';
-	var color = function () {
-		var _p17 = _elm_lang$core$List$head(card.issue.labels);
-		if (_p17.ctor === 'Nothing') {
-			return '#C2E4EF';
-		} else {
-			return A2(_elm_lang$core$Basics_ops['++'], '#', _p17._0.color);
-		}
-	}();
-	var css = _elm_lang$html$Html_Attributes$style(
-		{
-			ctor: '::',
-			_0: {
-				ctor: '_Tuple2',
-				_0: 'border-left',
-				_1: A2(_elm_lang$core$Basics_ops['++'], '6px solid ', color)
-			},
-			_1: {ctor: '[]'}
-		});
-	var dragattr = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$draggable, _user$project$Main$DragDrop, card.issue.id);
-	var attrs = {
-		ctor: '::',
-		_0: css,
-		_1: {
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('card'),
-			_1: dragattr
-		}
-	};
-	return A2(
-		_elm_lang$html$Html$div,
-		attrs,
-		{
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$span,
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html_Events$onClick(
-						_user$project$Main$DelIssueCard(card.issue.id)),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('card-remove'),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$title('Remove from the board'),
-							_1: {ctor: '[]'}
-						}
-					}
+var _user$project$Main$viewCard = F2(
+	function (dragId, card) {
+		var assignees = A2(_elm_lang$core$List$map, _user$project$Main$viewAssignee, card.issue.assignees);
+		var labels = A2(_elm_lang$core$List$map, _user$project$Main$viewLabel, card.issue.labels);
+		var stateClass = _elm_lang$core$Native_Utils.eq(card.issue.state, 'closed') ? 'state-closed' : '';
+		var highlight = _elm_lang$core$Native_Utils.eq(
+			A2(_elm_lang$core$Maybe$withDefault, 0, dragId),
+			card.issue.id) ? _elm_lang$html$Html_Attributes$class('card-dragged') : _elm_lang$html$Html_Attributes$class('');
+		var color = function () {
+			var _p18 = _elm_lang$core$List$head(card.issue.labels);
+			if (_p18.ctor === 'Nothing') {
+				return '#C2E4EF';
+			} else {
+				return A2(_elm_lang$core$Basics_ops['++'], '#', _p18._0.color);
+			}
+		}();
+		var css = _elm_lang$html$Html_Attributes$style(
+			{
+				ctor: '::',
+				_0: {
+					ctor: '_Tuple2',
+					_0: 'border-left',
+					_1: A2(_elm_lang$core$Basics_ops['++'], '6px solid ', color)
 				},
-				{
-					ctor: '::',
-					_0: _user$project$Main$icon('trash-o'),
-					_1: {ctor: '[]'}
-				}),
+				_1: {ctor: '[]'}
+			});
+		var dropattr = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$droppable, _user$project$Main$DragDrop, card.issue.id);
+		var dragattr = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$draggable, _user$project$Main$DragDrop, card.issue.id);
+		var attrs = {
+			ctor: '::',
+			_0: highlight,
 			_1: {
 				ctor: '::',
+				_0: css,
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('card'),
+					_1: dragattr
+				}
+			}
+		};
+		return A2(
+			_elm_lang$html$Html$div,
+			attrs,
+			{
+				ctor: '::',
 				_0: A2(
-					_elm_lang$html$Html$a,
+					_elm_lang$html$Html$span,
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$title(card.issue.body),
+						_0: _elm_lang$html$Html_Events$onClick(
+							_user$project$Main$DelIssueCard(card.issue.id)),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class(
-								A2(_elm_lang$core$Basics_ops['++'], 'card-title ', stateClass)),
+							_0: _elm_lang$html$Html_Attributes$class('card-remove'),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$href(card.issue.htmlUrl),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$target('_blank'),
-									_1: {ctor: '[]'}
-								}
+								_0: _elm_lang$html$Html_Attributes$title('Remove from the board'),
+								_1: {ctor: '[]'}
 							}
 						}
 					},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(card.issue.title),
+						_0: _user$project$Main$icon('trash-o'),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
 					ctor: '::',
 					_0: A2(
-						_elm_lang$html$Html$div,
+						_elm_lang$html$Html$a,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('card-meta'),
-							_1: {ctor: '[]'}
+							_0: _elm_lang$html$Html_Attributes$title(card.issue.body),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class(
+									A2(_elm_lang$core$Basics_ops['++'], 'card-title ', stateClass)),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$href(card.issue.htmlUrl),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$target('_blank'),
+										_1: {ctor: '[]'}
+									}
+								}
+							}
 						},
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							labels,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(card.issue.title),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
 							{
 								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$div,
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$class('card-metainfo'),
-										_1: {ctor: '[]'}
-									},
-									assignees),
-								_1: {
+								_0: _elm_lang$html$Html_Attributes$class('card-meta'),
+								_1: {ctor: '[]'}
+							},
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								labels,
+								{
 									ctor: '::',
 									_0: A2(
 										_elm_lang$html$Html$div,
@@ -12441,16 +12455,7 @@ var _user$project$Main$viewCard = function (card) {
 											_0: _elm_lang$html$Html_Attributes$class('card-metainfo'),
 											_1: {ctor: '[]'}
 										},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text(
-												_user$project$Main$issueLocation(card.issue.url)),
-											_1: {
-												ctor: '::',
-												_0: _user$project$Main$icon('code-fork'),
-												_1: {ctor: '[]'}
-											}
-										}),
+										assignees),
 									_1: {
 										ctor: '::',
 										_0: A2(
@@ -12463,24 +12468,43 @@ var _user$project$Main$viewCard = function (card) {
 											{
 												ctor: '::',
 												_0: _elm_lang$html$Html$text(
-													_elm_lang$core$Basics$toString(card.issue.comments)),
+													_user$project$Main$issueLocation(card.issue.url)),
 												_1: {
 													ctor: '::',
-													_0: _user$project$Main$icon('comments-o'),
+													_0: _user$project$Main$icon('code-fork'),
 													_1: {ctor: '[]'}
 												}
 											}),
-										_1: {ctor: '[]'}
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$div,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('card-metainfo'),
+													_1: {ctor: '[]'}
+												},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text(
+														_elm_lang$core$Basics$toString(card.issue.comments)),
+													_1: {
+														ctor: '::',
+														_0: _user$project$Main$icon('comments-o'),
+														_1: {ctor: '[]'}
+													}
+												}),
+											_1: {ctor: '[]'}
+										}
 									}
-								}
-							})),
-					_1: {ctor: '[]'}
+								})),
+						_1: {ctor: '[]'}
+					}
 				}
-			}
-		});
-};
-var _user$project$Main$viewCell = F2(
-	function (cards, position) {
+			});
+	});
+var _user$project$Main$viewCell = F3(
+	function (dragId, cards, position) {
 		var contains = A2(_user$project$Main$onlyContained, position, cards);
 		return A2(
 			_elm_lang$html$Html$div,
@@ -12492,15 +12516,18 @@ var _user$project$Main$viewCell = F2(
 					_1: {ctor: '[]'}
 				},
 				A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$droppable, _user$project$Main$DragDrop, position)),
-			A2(_elm_lang$core$List$map, _user$project$Main$viewCard, contains));
+			A2(
+				_elm_lang$core$List$map,
+				_user$project$Main$viewCard(dragId),
+				contains));
 	});
-var _user$project$Main$viewRow = F2(
-	function (_p18, cards) {
-		var _p19 = _p18;
-		var droppableIds = A2(_elm_lang$core$List$range, _p19._0, _p19._1);
+var _user$project$Main$viewRow = F3(
+	function (_p19, dragId, cards) {
+		var _p20 = _p19;
+		var droppableIds = A2(_elm_lang$core$List$range, _p20._0, _p20._1);
 		var dropzones = A2(
 			_elm_lang$core$List$map,
-			_user$project$Main$viewCell(cards),
+			A2(_user$project$Main$viewCell, dragId, cards),
 			droppableIds);
 		return A2(
 			_elm_lang$html$Html$div,
@@ -12513,8 +12540,8 @@ var _user$project$Main$viewRow = F2(
 	});
 var _user$project$Main$view = function (model) {
 	var error = function () {
-		var _p20 = model.error;
-		if (_p20.ctor === 'Nothing') {
+		var _p21 = model.error;
+		if (_p21.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$html$Html$div,
 				{ctor: '[]'},
@@ -12547,17 +12574,19 @@ var _user$project$Main$view = function (model) {
 						}),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p20._0),
+						_0: _elm_lang$html$Html$text(_p21._0),
 						_1: {ctor: '[]'}
 					}
 				});
 		}
 	}();
+	var dragId = _norpan$elm_html5_drag_drop$Html5_DragDrop$getDragId(model.dragDrop);
 	var clen = _elm_lang$core$List$length(_user$project$Main$columns);
 	var row = function (beginPos) {
-		return A2(
+		return A3(
 			_user$project$Main$viewRow,
 			{ctor: '_Tuple2', _0: clen * beginPos, _1: ((clen * beginPos) + clen) - 1},
+			dragId,
 			model.cards);
 	};
 	var rows = A2(

@@ -111,6 +111,15 @@ a {
 	border-radius: 3px;
 }
 
+.card-dragged {
+	border: 2px dashed #ADADAD !important;
+	background: #D0D0D0;
+}
+.card-dragged * {
+	visibility: hidden;
+	background: none;
+}
+
 .state-closed {
 	text-decoration: line-through #717171;
 }
