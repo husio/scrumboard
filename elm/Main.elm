@@ -32,7 +32,9 @@ type alias DraggableID =
 
 
 type alias DroppableID =
-    Int
+    { position : Int
+    , order : Int
+    }
 
 
 type alias Model =
@@ -54,7 +56,7 @@ type alias IssuePathInput =
 
 
 type alias Card =
-    { position : DroppableID
+    { position : Int
     , order : Int
     , issue : Issue
     }
@@ -178,13 +180,13 @@ update msg model =
                             Dict.fromList <| List.map (\c -> ( c.issue.id, c )) model.cards
 
                         update : CardState -> ( Maybe Card, Cmd Msg )
-                        update sccard =
-                            case Dict.get sccard.issueId idx of
+                        update sc =
+                            case Dict.get sc.issueId idx of
                                 Nothing ->
-                                    ( Nothing, refreshGithubIssue sccard.position model.flags.githubToken sccard.issueUrl )
+                                    ( Nothing, refreshGithubIssue (DroppableID sc.position sc.order) model.flags.githubToken sc.issueUrl )
 
                                 Just card ->
-                                    ( Just { card | position = sccard.position }, Cmd.none )
+                                    ( Just { card | position = sc.position }, Cmd.none )
 
                         ( maybeCards, cmds ) =
                             List.unzip <| List.map update state.cards
@@ -195,7 +197,7 @@ update msg model =
                         cards =
                             List.filterMap noop maybeCards
                     in
-                        ( { model | rows = state.rows, cards = sortCards cards }, Cmd.batch cmds )
+                        ( { model | rows = state.rows, cards = tidyCards cards }, Cmd.batch cmds )
 
         AddIssue ->
             case extractIssueInfo model.issueInput.value of
@@ -204,12 +206,12 @@ update msg model =
 
                 Just ( repo, issueId ) ->
                     -- add to first To Do
-                    ( { model | issueInput = issueInput "" }, fetchGitHubIssue 1 model.flags.githubToken model.githubOrg repo issueId )
+                    ( { model | issueInput = issueInput "" }, fetchGitHubIssue defaultDropId model.flags.githubToken model.githubOrg repo issueId )
 
         IssueFetched position (Ok issue) ->
             let
                 card =
-                    Card position 0 issue
+                    Card position.position position.order issue
 
                 withoutFetched =
                     List.filter (\c -> c.issue.id /= issue.id) model.cards
@@ -218,7 +220,7 @@ update msg model =
                     withoutFetched ++ [ card ]
 
                 m =
-                    { model | cards = sortCards cards }
+                    { model | cards = tidyCards cards }
             in
                 ( m, sendStateSync m )
 
@@ -228,7 +230,7 @@ update msg model =
         IssueRefreshed position (Ok issue) ->
             let
                 card =
-                    Card position 0 issue
+                    Card position.position position.order issue
 
                 withoutFetched =
                     List.filter (\c -> c.issue.id /= issue.id) model.cards
@@ -237,7 +239,7 @@ update msg model =
                     withoutFetched ++ [ card ]
 
                 m =
-                    { model | cards = sortCards cards }
+                    { model | cards = tidyCards cards }
             in
                 ( m, Cmd.none )
 
@@ -286,7 +288,7 @@ update msg model =
 
                 dropId =
                     DragDrop.getDropId dragModel
-                        |> Maybe.withDefault -1
+                        |> Maybe.withDefault defaultDropId
 
                 cards =
                     moveCardTo dropId dragId model.cards
@@ -294,7 +296,7 @@ update msg model =
                 m =
                     { model
                         | dragDrop = dragModel
-                        , cards = sortCards cards
+                        , cards = tidyCards cards
                     }
 
                 cmd =
@@ -318,21 +320,37 @@ update msg model =
                 ( m, sendStateSync m )
 
 
+tidyCards : List Card -> List Card
+tidyCards cards =
+    let
+        sorted =
+            sortCards cards
+
+        orders =
+            List.range 1 200
+
+        reorder : Int -> Card -> Card
+        reorder o c =
+            { c | order = o * 2 }
+    in
+        List.map2 reorder orders sorted
+
+
 sortCards : List Card -> List Card
 sortCards cards =
-    List.sortBy (\c -> c.order) cards
-
-
-moveCardTo : DroppableID -> DraggableID -> List Card -> List Card
-moveCardTo position cardId cards =
     let
-        updatePosition c =
-            if c.issue.id == cardId then
-                { c | position = position }
+        cardOrder : Card -> Card -> Order
+        cardOrder a b =
+            if a.position > b.position then
+                GT
+            else if a.position < b.position then
+                LT
+            else if a.order > b.order then
+                GT
             else
-                c
+                LT
     in
-        List.map updatePosition cards
+        List.sortWith cardOrder cards
 
 
 view : Model -> Html Msg
@@ -346,7 +364,7 @@ view model =
             DragDrop.getDragId model.dragDrop
 
         row beginPos =
-            viewRow ( clen * beginPos, clen * beginPos + clen - 1 ) dragId model.cards
+            viewRow ( DroppableID (clen * beginPos) 0, DroppableID (clen * beginPos + clen - 1) 0 ) dragId model.cards
 
         rows =
             List.map row (List.range 0 (model.rows - 1))
@@ -456,9 +474,13 @@ viewHeaders headers =
 viewRow : ( DroppableID, DroppableID ) -> Maybe DraggableID -> List Card -> Html Msg
 viewRow ( min, max ) dragId cards =
     let
+        droppablePositions : List Int
+        droppablePositions =
+            List.range min.position max.position
+
         droppableIds : List DroppableID
         droppableIds =
-            List.range min max
+            List.map2 DroppableID droppablePositions (List.range 0 30)
 
         dropzones : List (Html Msg)
         dropzones =
@@ -468,30 +490,51 @@ viewRow ( min, max ) dragId cards =
 
 
 viewCell : Maybe DraggableID -> List Card -> DroppableID -> Html Msg
-viewCell dragId cards position =
+viewCell dragId cards dropId =
     let
         contains =
-            onlyContained position cards
+            onlyContained dropId cards
+
+        -- drop attribute should be present only if there are no cards, because
+        -- otherwise we want to position relative to other cards.
+        dropAttr =
+            []
+
+        attrs =
+            [ class "board-cell" ] ++ dropAttr
+
+        cardViews =
+            List.map (viewCard dragId) contains
+
+        beforeHelper =
+            viewCardDrophelper (DroppableID dropId.position 0)
+
+        afterHelper =
+            viewCardDrophelper (DroppableID dropId.position 1000)
     in
-        div ([ class "board-cell" ] ++ DragDrop.droppable DragDrop position)
-            (List.map (viewCard dragId) contains)
+        div attrs (beforeHelper :: cardViews ++ [ afterHelper ])
 
 
-onlyContained : DraggableID -> List Card -> List Card
-onlyContained position cards =
-    List.filter (\c -> c.position == position) cards
+viewCardDrophelper : DroppableID -> Html Msg
+viewCardDrophelper dropId =
+    let
+        dropAttrs =
+            DragDrop.droppable DragDrop dropId
+
+        attrs =
+            class "drop-helper" :: dropAttrs
+    in
+        div attrs []
+
+
+onlyContained : DroppableID -> List Card -> List Card
+onlyContained dropId cards =
+    List.filter (\c -> c.position == dropId.position) cards
 
 
 viewCard : Maybe DraggableID -> Card -> Html Msg
 viewCard dragId card =
     let
-        dragattr =
-            DragDrop.draggable DragDrop card.issue.id
-
-        -- TODO
-        dropattr =
-            DragDrop.droppable DragDrop card.issue.id
-
         color =
             case List.head card.issue.labels of
                 Nothing ->
@@ -503,20 +546,20 @@ viewCard dragId card =
         css =
             style [ ( "border-left", "6px solid " ++ color ) ]
 
-        highlight =
-            if (Maybe.withDefault 0 dragId) == card.issue.id then
-                class "card-dragged"
+        placeholderClass =
+            if Maybe.withDefault 0 dragId == cardDragId card then
+                class "card-placeholder"
             else
                 class ""
 
-        attrs =
-            highlight :: css :: class "card" :: dragattr
+        dragattr =
+            DragDrop.draggable DragDrop <| cardDragId card
 
-        stateClass =
-            if card.issue.state == "closed" then
-                "state-closed"
-            else
-                ""
+        dropAttrs =
+            DragDrop.droppable DragDrop <| cardDropId card
+
+        attrs =
+            (placeholderClass :: css :: class "card" :: dragattr) ++ dropAttrs
 
         labels =
             List.map viewLabel card.issue.labels
@@ -533,7 +576,7 @@ viewCard dragId card =
                 [ icon "trash-o" ]
             , a
                 [ title card.issue.body
-                , class ("card-title " ++ stateClass)
+                , class ("card-title state-" ++ card.issue.state)
                 , href card.issue.htmlUrl
                 , target "_blank"
                 ]
@@ -659,6 +702,7 @@ encodeCard : Card -> Json.Encode.Value
 encodeCard card =
     Json.Encode.object
         [ ( "position", Json.Encode.int card.position )
+        , ( "order", Json.Encode.int card.order )
         , ( "issueUrl", Json.Encode.string card.issue.url )
         , ( "issueId", Json.Encode.int card.issue.id )
         ]
@@ -679,14 +723,16 @@ type alias State =
 
 decodeCardState : Json.Decode.Decoder CardState
 decodeCardState =
-    Json.Decode.map3 CardState
+    Json.Decode.map4 CardState
         (field "position" Json.Decode.int)
+        (field "order" Json.Decode.int)
         (field "issueUrl" Json.Decode.string)
         (field "issueId" Json.Decode.int)
 
 
 type alias CardState =
     { position : Int
+    , order : Int
     , issueUrl : String
     , issueId : Int
     }
@@ -705,3 +751,31 @@ sendStateSync model =
 icon : String -> Html Msg
 icon name =
     i [ class ("fa fa-" ++ name), attribute "aria-hidden" "true" ] []
+
+
+cardDragId : Card -> DraggableID
+cardDragId card =
+    card.issue.id
+
+
+cardDropId : Card -> DroppableID
+cardDropId card =
+    DroppableID card.position card.order
+
+
+moveCardTo : DroppableID -> DraggableID -> List Card -> List Card
+moveCardTo dropId cardId cards =
+    let
+        updatePosition : Card -> Card
+        updatePosition c =
+            if c.issue.id == cardId then
+                { c | position = dropId.position, order = dropId.order }
+            else
+                c
+    in
+        List.map updatePosition cards
+
+
+defaultDropId : DroppableID
+defaultDropId =
+    { position = 1, order = 0 }

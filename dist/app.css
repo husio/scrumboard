@@ -20,7 +20,7 @@ a {
 }
 
 .board-row {
-	min-height: 80px;
+	min-height: 60px;
 	display: flex;
 	border: 1px solid #EAEAEA;
 	border-top: 1px solid #E2E2E2;
@@ -30,8 +30,13 @@ a {
 }
 
 .board-cell {
-	padding: 0 10px;
+	padding: 0;
+	margin: 0;
 	flex: 1;
+
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
 }
 
 .board-cell:last-child {
@@ -58,7 +63,7 @@ a {
 	border-radius: 3px;
 	/*border-left: 4px solid #F1F1F1; set dynamically */
 	background: #F7F7F7;
-	min-height: 40px;
+	/* min-height: 40px; does not work with flex */
 	margin: 3px;
 	-webkit-touch-callout: none; /* iOS Safari */
 	-webkit-user-select: none; /* Safari */
@@ -111,11 +116,11 @@ a {
 	border-radius: 3px;
 }
 
-.card-dragged {
-	border: 2px dashed #ADADAD !important;
-	background: #D0D0D0;
+.card-placeholder {
+	border: 2px dashed #CCCCCC !important;
+	background: #F5F5F5;
 }
-.card-dragged * {
+.card-placeholder * {
 	visibility: hidden;
 	background: none;
 }
@@ -127,4 +132,13 @@ a {
 .avatar {
 	margin: 0 2px -4px 2px;
 	border-radius: 4px;
+}
+
+.drop-helper {
+	/* height: 8px; does not work with flex, but padding does ^^ */ padding: 4px 0;
+	margin: -2px 0;
+}
+
+.drop-helper:last-child {
+	flex-basis: 100%;
 }

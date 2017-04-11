@@ -11602,6 +11602,19 @@ var _user$project$GitHub$fetchIssue = F5(
 			A2(_elm_lang$http$Http$get, url, _user$project$GitHub$decodeIssue));
 	});
 
+var _user$project$Main$defaultDropId = {position: 1, order: 0};
+var _user$project$Main$moveCardTo = F3(
+	function (dropId, cardId, cards) {
+		var updatePosition = function (c) {
+			return _elm_lang$core$Native_Utils.eq(c.issue.id, cardId) ? _elm_lang$core$Native_Utils.update(
+				c,
+				{position: dropId.position, order: dropId.order}) : c;
+		};
+		return A2(_elm_lang$core$List$map, updatePosition, cards);
+	});
+var _user$project$Main$cardDragId = function (card) {
+	return card.issue.id;
+};
 var _user$project$Main$icon = function (name) {
 	return A2(
 		_elm_lang$html$Html$i,
@@ -11630,17 +11643,25 @@ var _user$project$Main$encodeCard = function (card) {
 				ctor: '::',
 				_0: {
 					ctor: '_Tuple2',
-					_0: 'issueUrl',
-					_1: _elm_lang$core$Json_Encode$string(card.issue.url)
+					_0: 'order',
+					_1: _elm_lang$core$Json_Encode$int(card.order)
 				},
 				_1: {
 					ctor: '::',
 					_0: {
 						ctor: '_Tuple2',
-						_0: 'issueId',
-						_1: _elm_lang$core$Json_Encode$int(card.issue.id)
+						_0: 'issueUrl',
+						_1: _elm_lang$core$Json_Encode$string(card.issue.url)
 					},
-					_1: {ctor: '[]'}
+					_1: {
+						ctor: '::',
+						_0: {
+							ctor: '_Tuple2',
+							_0: 'issueId',
+							_1: _elm_lang$core$Json_Encode$int(card.issue.id)
+						},
+						_1: {ctor: '[]'}
+					}
 				}
 			}
 		});
@@ -11792,11 +11813,11 @@ var _user$project$Main$viewAssignee = function (user) {
 		{ctor: '[]'});
 };
 var _user$project$Main$onlyContained = F2(
-	function (position, cards) {
+	function (dropId, cards) {
 		return A2(
 			_elm_lang$core$List$filter,
 			function (c) {
-				return _elm_lang$core$Native_Utils.eq(c.position, position);
+				return _elm_lang$core$Native_Utils.eq(c.position, dropId.position);
 			},
 			cards);
 	});
@@ -11842,22 +11863,23 @@ var _user$project$Main$onEnter = function (msg) {
 		'keydown',
 		A2(_elm_lang$core$Json_Decode$andThen, isEnter, _elm_lang$html$Html_Events$keyCode));
 };
-var _user$project$Main$moveCardTo = F3(
-	function (position, cardId, cards) {
-		var updatePosition = function (c) {
-			return _elm_lang$core$Native_Utils.eq(c.issue.id, cardId) ? _elm_lang$core$Native_Utils.update(
-				c,
-				{position: position}) : c;
-		};
-		return A2(_elm_lang$core$List$map, updatePosition, cards);
-	});
 var _user$project$Main$sortCards = function (cards) {
-	return A2(
-		_elm_lang$core$List$sortBy,
-		function (c) {
-			return c.order;
-		},
-		cards);
+	var cardOrder = F2(
+		function (a, b) {
+			return (_elm_lang$core$Native_Utils.cmp(a.position, b.position) > 0) ? _elm_lang$core$Basics$GT : ((_elm_lang$core$Native_Utils.cmp(a.position, b.position) < 0) ? _elm_lang$core$Basics$LT : ((_elm_lang$core$Native_Utils.cmp(a.order, b.order) > 0) ? _elm_lang$core$Basics$GT : _elm_lang$core$Basics$LT));
+		});
+	return A2(_elm_lang$core$List$sortWith, cardOrder, cards);
+};
+var _user$project$Main$tidyCards = function (cards) {
+	var reorder = F2(
+		function (o, c) {
+			return _elm_lang$core$Native_Utils.update(
+				c,
+				{order: o * 2});
+		});
+	var orders = A2(_elm_lang$core$List$range, 1, 200);
+	var sorted = _user$project$Main$sortCards(cards);
+	return A3(_elm_lang$core$List$map2, reorder, orders, sorted);
 };
 var _user$project$Main$columns = {
 	ctor: '::',
@@ -11880,6 +11902,13 @@ var _user$project$Main$ProgramFlags = F2(
 	function (a, b) {
 		return {githubToken: a, websocketAddress: b};
 	});
+var _user$project$Main$DroppableID = F2(
+	function (a, b) {
+		return {position: a, order: b};
+	});
+var _user$project$Main$cardDropId = function (card) {
+	return A2(_user$project$Main$DroppableID, card.position, card.order);
+};
 var _user$project$Main$Model = F8(
 	function (a, b, c, d, e, f, g, h) {
 		return {cards: a, dragDrop: b, rows: c, issueInput: d, error: e, flags: f, githubOrg: g, repositories: h};
@@ -11919,14 +11948,15 @@ var _user$project$Main$State = F2(
 	function (a, b) {
 		return {rows: a, cards: b};
 	});
-var _user$project$Main$CardState = F3(
-	function (a, b, c) {
-		return {position: a, issueUrl: b, issueId: c};
+var _user$project$Main$CardState = F4(
+	function (a, b, c, d) {
+		return {position: a, order: b, issueUrl: c, issueId: d};
 	});
-var _user$project$Main$decodeCardState = A4(
-	_elm_lang$core$Json_Decode$map3,
+var _user$project$Main$decodeCardState = A5(
+	_elm_lang$core$Json_Decode$map4,
 	_user$project$Main$CardState,
 	A2(_elm_lang$core$Json_Decode$field, 'position', _elm_lang$core$Json_Decode$int),
+	A2(_elm_lang$core$Json_Decode$field, 'order', _elm_lang$core$Json_Decode$int),
 	A2(_elm_lang$core$Json_Decode$field, 'issueUrl', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'issueId', _elm_lang$core$Json_Decode$int));
 var _user$project$Main$decodeState = A3(
@@ -12114,13 +12144,17 @@ var _user$project$Main$update = F2(
 								return {ctor: '_Tuple2', _0: c.issue.id, _1: c};
 							},
 							model.cards));
-					var update = function (sccard) {
-						var _p8 = A2(_elm_lang$core$Dict$get, sccard.issueId, idx);
+					var update = function (sc) {
+						var _p8 = A2(_elm_lang$core$Dict$get, sc.issueId, idx);
 						if (_p8.ctor === 'Nothing') {
 							return {
 								ctor: '_Tuple2',
 								_0: _elm_lang$core$Maybe$Nothing,
-								_1: A3(_user$project$Main$refreshGithubIssue, sccard.position, model.flags.githubToken, sccard.issueUrl)
+								_1: A3(
+									_user$project$Main$refreshGithubIssue,
+									A2(_user$project$Main$DroppableID, sc.position, sc.order),
+									model.flags.githubToken,
+									sc.issueUrl)
 							};
 						} else {
 							return {
@@ -12128,7 +12162,7 @@ var _user$project$Main$update = F2(
 								_0: _elm_lang$core$Maybe$Just(
 									_elm_lang$core$Native_Utils.update(
 										_p8._0,
-										{position: sccard.position})),
+										{position: sc.position})),
 								_1: _elm_lang$core$Platform_Cmd$none
 							};
 						}
@@ -12144,7 +12178,7 @@ var _user$project$Main$update = F2(
 							model,
 							{
 								rows: _p10.rows,
-								cards: _user$project$Main$sortCards(cards)
+								cards: _user$project$Main$tidyCards(cards)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$batch(cmds)
 					};
@@ -12161,11 +12195,12 @@ var _user$project$Main$update = F2(
 							{
 								issueInput: _user$project$Main$issueInput('')
 							}),
-						_1: A5(_user$project$Main$fetchGitHubIssue, 1, model.flags.githubToken, model.githubOrg, _p11._0._0, _p11._0._1)
+						_1: A5(_user$project$Main$fetchGitHubIssue, _user$project$Main$defaultDropId, model.flags.githubToken, model.githubOrg, _p11._0._0, _p11._0._1)
 					};
 				}
 			case 'IssueFetched':
 				if (_p6._1.ctor === 'Ok') {
+					var _p13 = _p6._0;
 					var _p12 = _p6._1._0;
 					var withoutFetched = A2(
 						_elm_lang$core$List$filter,
@@ -12173,7 +12208,7 @@ var _user$project$Main$update = F2(
 							return !_elm_lang$core$Native_Utils.eq(c.issue.id, _p12.id);
 						},
 						model.cards);
-					var card = A3(_user$project$Main$Card, _p6._0, 0, _p12);
+					var card = A3(_user$project$Main$Card, _p13.position, _p13.order, _p12);
 					var cards = A2(
 						_elm_lang$core$Basics_ops['++'],
 						withoutFetched,
@@ -12185,7 +12220,7 @@ var _user$project$Main$update = F2(
 					var m = _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							cards: _user$project$Main$sortCards(cards)
+							cards: _user$project$Main$tidyCards(cards)
 						});
 					return {
 						ctor: '_Tuple2',
@@ -12206,14 +12241,15 @@ var _user$project$Main$update = F2(
 				}
 			case 'IssueRefreshed':
 				if (_p6._1.ctor === 'Ok') {
-					var _p13 = _p6._1._0;
+					var _p15 = _p6._0;
+					var _p14 = _p6._1._0;
 					var withoutFetched = A2(
 						_elm_lang$core$List$filter,
 						function (c) {
-							return !_elm_lang$core$Native_Utils.eq(c.issue.id, _p13.id);
+							return !_elm_lang$core$Native_Utils.eq(c.issue.id, _p14.id);
 						},
 						model.cards);
-					var card = A3(_user$project$Main$Card, _p6._0, 0, _p13);
+					var card = A3(_user$project$Main$Card, _p15.position, _p15.order, _p14);
 					var cards = A2(
 						_elm_lang$core$Basics_ops['++'],
 						withoutFetched,
@@ -12225,7 +12261,7 @@ var _user$project$Main$update = F2(
 					var m = _elm_lang$core$Native_Utils.update(
 						model,
 						{
-							cards: _user$project$Main$sortCards(cards)
+							cards: _user$project$Main$tidyCards(cards)
 						});
 					return {ctor: '_Tuple2', _0: m, _1: _elm_lang$core$Platform_Cmd$none};
 				} else {
@@ -12271,40 +12307,40 @@ var _user$project$Main$update = F2(
 					_1: _user$project$Main$sendStateSync(m)
 				};
 			case 'DragDrop':
-				var _p14 = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$updateSticky, _p6._0, model.dragDrop);
-				var dragModel = _p14._0;
-				var result = _p14._1;
-				var _p15 = function () {
-					var _p16 = result;
-					if (_p16.ctor === 'Nothing') {
+				var _p16 = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$updateSticky, _p6._0, model.dragDrop);
+				var dragModel = _p16._0;
+				var result = _p16._1;
+				var _p17 = function () {
+					var _p18 = result;
+					if (_p18.ctor === 'Nothing') {
 						return {ctor: '_Tuple2', _0: model.cards, _1: false};
 					} else {
 						return {
 							ctor: '_Tuple2',
-							_0: A3(_user$project$Main$moveCardTo, _p16._0._1, _p16._0._0, model.cards),
+							_0: A3(_user$project$Main$moveCardTo, _p18._0._1, _p18._0._0, model.cards),
 							_1: true
 						};
 					}
 				}();
-				var sync = _p15._1;
+				var sync = _p17._1;
 				var dragId = A2(
 					_elm_lang$core$Maybe$withDefault,
 					-1,
 					_norpan$elm_html5_drag_drop$Html5_DragDrop$getDragId(dragModel));
 				var dropId = A2(
 					_elm_lang$core$Maybe$withDefault,
-					-1,
+					_user$project$Main$defaultDropId,
 					_norpan$elm_html5_drag_drop$Html5_DragDrop$getDropId(dragModel));
 				var cards = A3(_user$project$Main$moveCardTo, dropId, dragId, model.cards);
 				var m = _elm_lang$core$Native_Utils.update(
 					model,
 					{
 						dragDrop: dragModel,
-						cards: _user$project$Main$sortCards(cards)
+						cards: _user$project$Main$tidyCards(cards)
 					});
 				var cmd = function () {
-					var _p17 = result;
-					if (_p17.ctor === 'Just') {
+					var _p19 = result;
+					if (_p19.ctor === 'Just') {
 						return _user$project$Main$sendStateSync(m);
 					} else {
 						return _elm_lang$core$Platform_Cmd$none;
@@ -12340,20 +12376,39 @@ var _user$project$Main$AddRow = {ctor: 'AddRow'};
 var _user$project$Main$DragDrop = function (a) {
 	return {ctor: 'DragDrop', _0: a};
 };
+var _user$project$Main$viewCardDrophelper = function (dropId) {
+	var dropAttrs = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$droppable, _user$project$Main$DragDrop, dropId);
+	var attrs = {
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$class('drop-helper'),
+		_1: dropAttrs
+	};
+	return A2(
+		_elm_lang$html$Html$div,
+		attrs,
+		{ctor: '[]'});
+};
 var _user$project$Main$viewCard = F2(
 	function (dragId, card) {
 		var assignees = A2(_elm_lang$core$List$map, _user$project$Main$viewAssignee, card.issue.assignees);
 		var labels = A2(_elm_lang$core$List$map, _user$project$Main$viewLabel, card.issue.labels);
-		var stateClass = _elm_lang$core$Native_Utils.eq(card.issue.state, 'closed') ? 'state-closed' : '';
-		var highlight = _elm_lang$core$Native_Utils.eq(
+		var dropAttrs = A2(
+			_norpan$elm_html5_drag_drop$Html5_DragDrop$droppable,
+			_user$project$Main$DragDrop,
+			_user$project$Main$cardDropId(card));
+		var dragattr = A2(
+			_norpan$elm_html5_drag_drop$Html5_DragDrop$draggable,
+			_user$project$Main$DragDrop,
+			_user$project$Main$cardDragId(card));
+		var placeholderClass = _elm_lang$core$Native_Utils.eq(
 			A2(_elm_lang$core$Maybe$withDefault, 0, dragId),
-			card.issue.id) ? _elm_lang$html$Html_Attributes$class('card-dragged') : _elm_lang$html$Html_Attributes$class('');
+			_user$project$Main$cardDragId(card)) ? _elm_lang$html$Html_Attributes$class('card-placeholder') : _elm_lang$html$Html_Attributes$class('');
 		var color = function () {
-			var _p18 = _elm_lang$core$List$head(card.issue.labels);
-			if (_p18.ctor === 'Nothing') {
+			var _p20 = _elm_lang$core$List$head(card.issue.labels);
+			if (_p20.ctor === 'Nothing') {
 				return '#C2E4EF';
 			} else {
-				return A2(_elm_lang$core$Basics_ops['++'], '#', _p18._0.color);
+				return A2(_elm_lang$core$Basics_ops['++'], '#', _p20._0.color);
 			}
 		}();
 		var css = _elm_lang$html$Html_Attributes$style(
@@ -12366,21 +12421,22 @@ var _user$project$Main$viewCard = F2(
 				},
 				_1: {ctor: '[]'}
 			});
-		var dropattr = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$droppable, _user$project$Main$DragDrop, card.issue.id);
-		var dragattr = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$draggable, _user$project$Main$DragDrop, card.issue.id);
-		var attrs = {
-			ctor: '::',
-			_0: highlight,
-			_1: {
+		var attrs = A2(
+			_elm_lang$core$Basics_ops['++'],
+			{
 				ctor: '::',
-				_0: css,
+				_0: placeholderClass,
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('card'),
-					_1: dragattr
+					_0: css,
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('card'),
+						_1: dragattr
+					}
 				}
-			}
-		};
+			},
+			dropAttrs);
 		return A2(
 			_elm_lang$html$Html$div,
 			attrs,
@@ -12417,7 +12473,7 @@ var _user$project$Main$viewCard = F2(
 							_1: {
 								ctor: '::',
 								_0: _elm_lang$html$Html_Attributes$class(
-									A2(_elm_lang$core$Basics_ops['++'], 'card-title ', stateClass)),
+									A2(_elm_lang$core$Basics_ops['++'], 'card-title state-', card.issue.state)),
 								_1: {
 									ctor: '::',
 									_0: _elm_lang$html$Html_Attributes$href(card.issue.htmlUrl),
@@ -12504,27 +12560,50 @@ var _user$project$Main$viewCard = F2(
 			});
 	});
 var _user$project$Main$viewCell = F3(
-	function (dragId, cards, position) {
-		var contains = A2(_user$project$Main$onlyContained, position, cards);
+	function (dragId, cards, dropId) {
+		var afterHelper = _user$project$Main$viewCardDrophelper(
+			A2(_user$project$Main$DroppableID, dropId.position, 1000));
+		var beforeHelper = _user$project$Main$viewCardDrophelper(
+			A2(_user$project$Main$DroppableID, dropId.position, 0));
+		var dropAttr = {ctor: '[]'};
+		var attrs = A2(
+			_elm_lang$core$Basics_ops['++'],
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('board-cell'),
+				_1: {ctor: '[]'}
+			},
+			dropAttr);
+		var contains = A2(_user$project$Main$onlyContained, dropId, cards);
+		var cardViews = A2(
+			_elm_lang$core$List$map,
+			_user$project$Main$viewCard(dragId),
+			contains);
 		return A2(
 			_elm_lang$html$Html$div,
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('board-cell'),
-					_1: {ctor: '[]'}
-				},
-				A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$droppable, _user$project$Main$DragDrop, position)),
-			A2(
-				_elm_lang$core$List$map,
-				_user$project$Main$viewCard(dragId),
-				contains));
+			attrs,
+			{
+				ctor: '::',
+				_0: beforeHelper,
+				_1: A2(
+					_elm_lang$core$Basics_ops['++'],
+					cardViews,
+					{
+						ctor: '::',
+						_0: afterHelper,
+						_1: {ctor: '[]'}
+					})
+			});
 	});
 var _user$project$Main$viewRow = F3(
-	function (_p19, dragId, cards) {
-		var _p20 = _p19;
-		var droppableIds = A2(_elm_lang$core$List$range, _p20._0, _p20._1);
+	function (_p21, dragId, cards) {
+		var _p22 = _p21;
+		var droppablePositions = A2(_elm_lang$core$List$range, _p22._0.position, _p22._1.position);
+		var droppableIds = A3(
+			_elm_lang$core$List$map2,
+			_user$project$Main$DroppableID,
+			droppablePositions,
+			A2(_elm_lang$core$List$range, 0, 30));
 		var dropzones = A2(
 			_elm_lang$core$List$map,
 			A2(_user$project$Main$viewCell, dragId, cards),
@@ -12540,8 +12619,8 @@ var _user$project$Main$viewRow = F3(
 	});
 var _user$project$Main$view = function (model) {
 	var error = function () {
-		var _p21 = model.error;
-		if (_p21.ctor === 'Nothing') {
+		var _p23 = model.error;
+		if (_p23.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$html$Html$div,
 				{ctor: '[]'},
@@ -12574,7 +12653,7 @@ var _user$project$Main$view = function (model) {
 						}),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p21._0),
+						_0: _elm_lang$html$Html$text(_p23._0),
 						_1: {ctor: '[]'}
 					}
 				});
@@ -12585,7 +12664,11 @@ var _user$project$Main$view = function (model) {
 	var row = function (beginPos) {
 		return A3(
 			_user$project$Main$viewRow,
-			{ctor: '_Tuple2', _0: clen * beginPos, _1: ((clen * beginPos) + clen) - 1},
+			{
+				ctor: '_Tuple2',
+				_0: A2(_user$project$Main$DroppableID, clen * beginPos, 0),
+				_1: A2(_user$project$Main$DroppableID, ((clen * beginPos) + clen) - 1, 0)
+			},
 			dragId,
 			model.cards);
 	};
