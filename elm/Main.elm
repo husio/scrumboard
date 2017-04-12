@@ -401,6 +401,9 @@ view model =
                 , button [ onClick AddIssue, disabled (not model.issueInput.valid || model.githubOrg == "") ] [ text "Add issue to the board" ]
                 , div [ class "board" ] (viewHeaders columns :: rows)
                 ]
+            , div
+                [ class "footer" ]
+                [ a [ href "https://github.com/husio/scrumboard", target "_blank" ] [ icon "github", text " source code" ] ]
             ]
 
 
