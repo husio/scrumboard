@@ -15,8 +15,10 @@ func (app *ScrumBoardApp) board(w http.ResponseWriter, r *http.Request) {
 
 	content := struct {
 		Account *auth.Account
+		Debug   bool
 	}{
 		Account: account,
+		Debug:   app.debug,
 	}
 	app.html.Render(w, http.StatusOK, "board.tmpl", content)
 }

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 
 	"golang.org/x/oauth2"
 )
@@ -16,6 +15,7 @@ type Provider struct {
 	clientSecret string
 	endpoint     oauth2.Endpoint
 	scopes       []string
+	useHttps     bool
 
 	fetchUser func(*http.Client) (*providerUser, error)
 }
@@ -24,7 +24,7 @@ func (p *Provider) Config(r *http.Request) *oauth2.Config {
 	scheme := "https"
 
 	// local development requires http
-	if os.Getenv("DEBUG") == "true" {
+	if !p.useHttps {
 		scheme = "http"
 	}
 

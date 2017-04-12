@@ -39,13 +39,14 @@ func fetchGithubUser(c *http.Client) (*providerUser, error) {
 	return u, nil
 }
 
-func GithubProvider(clientID, clientSecret string) Provider {
+func GithubProvider(useHttps bool, clientID, clientSecret string) Provider {
 	return Provider{
 		Name:         "GitHub",
 		Codename:     "github",
 		fetchUser:    fetchGithubUser,
 		clientID:     clientID,
 		clientSecret: clientSecret,
+		useHttps:     useHttps,
 		endpoint: oauth2.Endpoint{
 			AuthURL:  "https://github.com/login/oauth/authorize",
 			TokenURL: "https://github.com/login/oauth/access_token",

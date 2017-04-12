@@ -9,11 +9,12 @@ import (
 )
 
 type ScrumBoardApp struct {
-	ps   pubSub
-	html surf.Renderer
-	mux  http.Handler
-	log  surf.Logger
-	auth Authenticator
+	ps    pubSub
+	html  surf.Renderer
+	debug bool
+	mux   http.Handler
+	log   surf.Logger
+	auth  Authenticator
 }
 
 type Authenticator interface {
@@ -23,11 +24,13 @@ type Authenticator interface {
 func NewApp(
 	html surf.Renderer,
 	auth Authenticator,
+	debug bool,
 ) *ScrumBoardApp {
 	app := ScrumBoardApp{
-		html: html,
-		log:  surf.NewLogger(os.Stdout, "app", "scrumboard"),
-		auth: auth,
+		html:  html,
+		log:   surf.NewLogger(os.Stdout, "app", "scrumboard"),
+		auth:  auth,
+		debug: debug,
 		ps: pubSub{
 			// initial state -_-
 			state: `{"rows": 3, "cards": []}`,

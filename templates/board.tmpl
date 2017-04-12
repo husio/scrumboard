@@ -15,7 +15,7 @@
 (function() {
   var app = Elm.Main.fullscreen({
     githubToken: "{{.Account.AccessToken}}",
-    websocketAddress: 'ws://' + location.host + '/ws',
+    websocketAddress: '{{if .Debug}}ws://{{else}}wss://{{end}}' + location.host + '/ws',
   })
 })()
     </script>

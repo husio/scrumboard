@@ -14,6 +14,5 @@ elm-watch:
 		inotifywait *.elm > /dev/null; \
 	done
 
-
 devserver:
 	DEBUG=true STATIC=./dist rerun github.com/husio/scrumboard

@@ -35,10 +35,10 @@ func main() {
 	html.Debug = debug
 
 	providers := []auth.Provider{
-		auth.GithubProvider(githubClientId, githubSecret),
+		auth.GithubProvider(!debug, githubClientId, githubSecret),
 	}
 	authApp := auth.NewApp(cache, html, providers)
-	scrumBoardApp := scrumboard.NewApp(html, authApp)
+	scrumBoardApp := scrumboard.NewApp(html, authApp, debug)
 
 	rt := surf.NewRouter()
 	rt.Get(`/`, scrumBoardApp)
