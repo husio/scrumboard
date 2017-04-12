@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 
 	"golang.org/x/oauth2"
 )
@@ -20,10 +21,10 @@ type Provider struct {
 }
 
 func (p *Provider) Config(r *http.Request) *oauth2.Config {
+	scheme := "https"
+
 	// local development requires http
-	// TODO
-	scheme := "http"
-	if r.URL.Scheme == "" {
+	if os.Getenv("DEBUG") == "true" {
 		scheme = "http"
 	}
 
