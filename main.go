@@ -17,7 +17,7 @@ func main() {
 	debug := env("DEBUG", "false") == "true"
 	httpPort := env("PORT", "8000")
 	staticPath := env("STATIC", "./dist")
-	redisUrl := env("REDIS", "redis://localhost:6379/2")
+	redisUrl := env("REDIS_URL", "redis://localhost:6379/2")
 	templatesPath := env("TEMPLATES", "./templates/**.tmpl")
 	// registered as http://scrumboard.dev:8000 (edit your /etc/hosts)
 	githubClientId := env("GITHUB_CLIENT_ID", "f52ce2105e1023495aca")
