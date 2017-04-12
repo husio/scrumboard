@@ -5,15 +5,16 @@ import (
 	"os"
 
 	"github.com/husio/scrumboard/server/auth"
+	"github.com/husio/scrumboard/server/pubsub"
 	"github.com/husio/scrumboard/server/surf"
 )
 
 type ScrumBoardApp struct {
-	ps    pubSub
 	html  surf.Renderer
 	debug bool
 	mux   http.Handler
 	log   surf.Logger
+	hub   pubsub.Hub
 	auth  Authenticator
 }
 
@@ -24,23 +25,21 @@ type Authenticator interface {
 func NewApp(
 	html surf.Renderer,
 	auth Authenticator,
+	hub pubsub.Hub,
 	debug bool,
 ) *ScrumBoardApp {
 	app := ScrumBoardApp{
 		html:  html,
 		log:   surf.NewLogger(os.Stdout, "app", "scrumboard"),
 		auth:  auth,
+		hub:   hub,
 		debug: debug,
-		ps: pubSub{
-			// initial state -_-
-			state: `{"rows": 3, "cards": []}`,
-			subs:  make(map[chan<- string]struct{}),
-		},
 	}
 
 	rt := surf.NewRouter()
-	rt.Get(`/`, app.board)
-	rt.Get(`/ws`, app.ps.handleClient)
+	rt.Get(`/`, app.index)
+	rt.Get(`/b/<board-id>`, app.board)
+	rt.Get(`/ws/<board-id>`, app.handleClient)
 	app.mux = rt
 
 	return &app

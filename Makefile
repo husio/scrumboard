@@ -7,6 +7,13 @@ app.min.js: app.js
 	curl -X POST -s --data-urlencode 'input@app.js' https://javascript-minifier.com/raw \
 	        > app.min.js
 
+app.min.css:
+	cd dist; \
+	curl -X POST -s --data-urlencode 'input@app.css' https://cssminifier.com/raw \
+		> app.min.css
+
+build: app.min.js app.min.css
+
 elm-watch:
 	cd elm; \
 	while true; do \
