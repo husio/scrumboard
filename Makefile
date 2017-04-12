@@ -12,7 +12,7 @@ app.min.css:
 	curl -X POST -s --data-urlencode 'input@app.css' https://cssminifier.com/raw \
 		> app.min.css
 
-build: app.min.js app.min.css
+dist: app.min.js app.min.css
 
 elm-watch:
 	cd elm; \
