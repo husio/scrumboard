@@ -1,10 +1,9 @@
 package cache
 
 import (
+	"context"
 	"errors"
 	"time"
-
-	"golang.org/x/net/context"
 )
 
 // Cache represents high level cache client with custom serialization

@@ -1,11 +1,10 @@
 package cache
 
 import (
+	"context"
 	"encoding/json"
 	"sync"
 	"time"
-
-	"golang.org/x/net/context"
 )
 
 type LocalMemCache struct {

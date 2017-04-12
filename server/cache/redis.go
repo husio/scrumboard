@@ -1,13 +1,12 @@
 package cache
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/garyburd/redigo/redis"
-
-	"golang.org/x/net/context"
 )
 
 type RedisCache struct {
