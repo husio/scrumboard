@@ -11898,6 +11898,25 @@ var _user$project$Main$columns = {
 		}
 	}
 };
+var _user$project$Main$adjustRowNumber = function (model) {
+	var colnum = _elm_lang$core$Basics$toFloat(
+		_elm_lang$core$List$length(_user$project$Main$columns));
+	var maxrow = _elm_lang$core$Basics$toFloat(
+		A2(
+			_elm_lang$core$Maybe$withDefault,
+			0,
+			_elm_lang$core$List$maximum(
+				A2(
+					_elm_lang$core$List$map,
+					function (_) {
+						return _.position;
+					},
+					model.cards))));
+	var needrows = _elm_lang$core$Basics$ceiling(maxrow / colnum);
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{rows: needrows + 1});
+};
 var _user$project$Main$ProgramFlags = F2(
 	function (a, b) {
 		return {githubToken: a, websocketAddress: b};
@@ -12172,14 +12191,16 @@ var _user$project$Main$update = F2(
 					var maybeCards = _p9._0;
 					var cmds = _p9._1;
 					var cards = A2(_elm_lang$core$List$filterMap, noop, maybeCards);
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
+					var m = _user$project$Main$adjustRowNumber(
+						_elm_lang$core$Native_Utils.update(
 							model,
 							{
 								rows: _p10.rows,
 								cards: _user$project$Main$tidyCards(cards)
-							}),
+							}));
+					return {
+						ctor: '_Tuple2',
+						_0: m,
 						_1: _elm_lang$core$Platform_Cmd$batch(cmds)
 					};
 				}
@@ -12217,11 +12238,12 @@ var _user$project$Main$update = F2(
 							_0: card,
 							_1: {ctor: '[]'}
 						});
-					var m = _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							cards: _user$project$Main$tidyCards(cards)
-						});
+					var m = _user$project$Main$adjustRowNumber(
+						_elm_lang$core$Native_Utils.update(
+							model,
+							{
+								cards: _user$project$Main$tidyCards(cards)
+							}));
 					return {
 						ctor: '_Tuple2',
 						_0: m,
@@ -12258,11 +12280,12 @@ var _user$project$Main$update = F2(
 							_0: card,
 							_1: {ctor: '[]'}
 						});
-					var m = _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							cards: _user$project$Main$tidyCards(cards)
-						});
+					var m = _user$project$Main$adjustRowNumber(
+						_elm_lang$core$Native_Utils.update(
+							model,
+							{
+								cards: _user$project$Main$tidyCards(cards)
+							}));
 					return {ctor: '_Tuple2', _0: m, _1: _elm_lang$core$Platform_Cmd$none};
 				} else {
 					return {
@@ -12285,26 +12308,6 @@ var _user$project$Main$update = F2(
 							issueInput: _user$project$Main$issueInput(_p6._0)
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'AddRow':
-				var m = _elm_lang$core$Native_Utils.update(
-					model,
-					{rows: model.rows + 1});
-				return {
-					ctor: '_Tuple2',
-					_0: m,
-					_1: _user$project$Main$sendStateSync(m)
-				};
-			case 'DelRow':
-				var m = _elm_lang$core$Native_Utils.update(
-					model,
-					{
-						rows: (_elm_lang$core$Native_Utils.cmp(model.rows, 2) > 0) ? (model.rows - 1) : 1
-					});
-				return {
-					ctor: '_Tuple2',
-					_0: m,
-					_1: _user$project$Main$sendStateSync(m)
 				};
 			case 'DragDrop':
 				var _p16 = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$updateSticky, _p6._0, model.dragDrop);
@@ -12332,12 +12335,13 @@ var _user$project$Main$update = F2(
 					_user$project$Main$defaultDropId,
 					_norpan$elm_html5_drag_drop$Html5_DragDrop$getDropId(dragModel));
 				var cards = A3(_user$project$Main$moveCardTo, dropId, dragId, model.cards);
-				var m = _elm_lang$core$Native_Utils.update(
-					model,
-					{
-						dragDrop: dragModel,
-						cards: _user$project$Main$tidyCards(cards)
-					});
+				var m = _user$project$Main$adjustRowNumber(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							dragDrop: dragModel,
+							cards: _user$project$Main$tidyCards(cards)
+						}));
 				var cmd = function () {
 					var _p19 = result;
 					if (_p19.ctor === 'Just') {
@@ -12354,9 +12358,10 @@ var _user$project$Main$update = F2(
 						return !_elm_lang$core$Native_Utils.eq(c.issue.id, _p6._0);
 					},
 					model.cards);
-				var m = _elm_lang$core$Native_Utils.update(
-					model,
-					{cards: cards});
+				var m = _user$project$Main$adjustRowNumber(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{cards: cards}));
 				return {
 					ctor: '_Tuple2',
 					_0: m,
@@ -12371,8 +12376,6 @@ var _user$project$Main$AddIssue = {ctor: 'AddIssue'};
 var _user$project$Main$IssueInputChanged = function (a) {
 	return {ctor: 'IssueInputChanged', _0: a};
 };
-var _user$project$Main$DelRow = {ctor: 'DelRow'};
-var _user$project$Main$AddRow = {ctor: 'AddRow'};
 var _user$project$Main$DragDrop = function (a) {
 	return {ctor: 'DragDrop', _0: a};
 };
@@ -12765,37 +12768,7 @@ var _user$project$Main$view = function (model) {
 							}
 						}
 					}),
-				_1: {
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$button,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$AddRow),
-							_1: {ctor: '[]'}
-						},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text('add row'),
-							_1: {ctor: '[]'}
-						}),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$button,
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$DelRow),
-								_1: {ctor: '[]'}
-							},
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html$text('remove row'),
-								_1: {ctor: '[]'}
-							}),
-						_1: {ctor: '[]'}
-					}
-				}
+				_1: {ctor: '[]'}
 			}
 		});
 };

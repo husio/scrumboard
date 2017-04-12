@@ -91,8 +91,6 @@ type alias IssueLabel =
 
 type Msg
     = DragDrop (DragDrop.Msg DraggableID DroppableID)
-    | AddRow
-    | DelRow
     | IssueInputChanged String
     | AddIssue
     | DelIssueCard Int
@@ -196,8 +194,11 @@ update msg model =
 
                         cards =
                             List.filterMap noop maybeCards
+
+                        m =
+                            adjustRowNumber { model | rows = state.rows, cards = tidyCards cards }
                     in
-                        ( { model | rows = state.rows, cards = tidyCards cards }, Cmd.batch cmds )
+                        ( m, Cmd.batch cmds )
 
         AddIssue ->
             case extractIssueInfo model.issueInput.value of
@@ -205,7 +206,6 @@ update msg model =
                     ( model, Cmd.none )
 
                 Just ( repo, issueId ) ->
-                    -- add to first To Do
                     ( { model | issueInput = issueInput "" }, fetchGitHubIssue defaultDropId model.flags.githubToken model.githubOrg repo issueId )
 
         IssueFetched position (Ok issue) ->
@@ -220,7 +220,7 @@ update msg model =
                     withoutFetched ++ [ card ]
 
                 m =
-                    { model | cards = tidyCards cards }
+                    adjustRowNumber { model | cards = tidyCards cards }
             in
                 ( m, sendStateSync m )
 
@@ -239,7 +239,7 @@ update msg model =
                     withoutFetched ++ [ card ]
 
                 m =
-                    { model | cards = tidyCards cards }
+                    adjustRowNumber { model | cards = tidyCards cards }
             in
                 ( m, Cmd.none )
 
@@ -248,26 +248,6 @@ update msg model =
 
         IssueInputChanged val ->
             ( { model | issueInput = issueInput val }, Cmd.none )
-
-        AddRow ->
-            let
-                m =
-                    { model | rows = model.rows + 1 }
-            in
-                ( m, sendStateSync m )
-
-        DelRow ->
-            let
-                m =
-                    { model
-                        | rows =
-                            if model.rows > 2 then
-                                model.rows - 1
-                            else
-                                1
-                    }
-            in
-                ( m, sendStateSync m )
 
         DragDrop dragMsg ->
             let
@@ -294,10 +274,11 @@ update msg model =
                     moveCardTo dropId dragId model.cards
 
                 m =
-                    { model
-                        | dragDrop = dragModel
-                        , cards = tidyCards cards
-                    }
+                    adjustRowNumber
+                        { model
+                            | dragDrop = dragModel
+                            , cards = tidyCards cards
+                        }
 
                 cmd =
                     case result of
@@ -315,9 +296,33 @@ update msg model =
                     List.filter (\c -> c.issue.id /= issueId) model.cards
 
                 m =
-                    { model | cards = cards }
+                    adjustRowNumber { model | cards = cards }
             in
                 ( m, sendStateSync m )
+
+
+adjustRowNumber : Model -> Model
+adjustRowNumber model =
+    -- make sure there is always only one empty row at the very bottom, but do
+    -- not remove middle rows
+    let
+        maxrow : Float
+        maxrow =
+            List.map .position model.cards
+                |> List.maximum
+                |> Maybe.withDefault 0
+                |> toFloat
+
+        colnum : Float
+        colnum =
+            List.length columns
+                |> toFloat
+
+        needrows : Int
+        needrows =
+            ceiling (maxrow / colnum)
+    in
+        { model | rows = needrows + 1 }
 
 
 tidyCards : List Card -> List Card
@@ -396,8 +401,6 @@ view model =
                 , button [ onClick AddIssue, disabled (not model.issueInput.valid || model.githubOrg == "") ] [ text "Add issue to the board" ]
                 , div [ class "board" ] (viewHeaders columns :: rows)
                 ]
-            , button [ onClick AddRow ] [ text "add row" ]
-            , button [ onClick DelRow ] [ text "remove row" ]
             ]
 
 
