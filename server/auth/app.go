@@ -13,6 +13,7 @@ type AuthApp struct {
 	html      surf.Renderer
 	mux       http.Handler
 	log       surf.Logger
+	debug     bool
 	providers map[string]Provider
 }
 
@@ -20,6 +21,7 @@ func NewApp(
 	cache cache.Cache,
 	html surf.Renderer,
 	providers []Provider,
+	debug bool,
 ) *AuthApp {
 	rt := surf.NewRouter()
 
@@ -33,6 +35,7 @@ func NewApp(
 		html:      html,
 		mux:       rt,
 		log:       surf.NewLogger(os.Stdout, "app", "auth"),
+		debug:     debug,
 		providers: providersmap,
 	}
 

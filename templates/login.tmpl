@@ -5,14 +5,16 @@
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
    <link rel="shortcut icon" type="image/x-icon" href="/static/favicon.ico">
-   <title>Scrum board</title>
+   <title>Login{{if .Debug}} ⛏{{end}}</title>
    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" crossorigin="anonymous">
-   <link href="/static/app.css" rel="stylesheet" media="all">
+   <link href="/static/app{{if not .Debug}}.min{{end}}.css" rel="stylesheet" media="all">
  </head>
   <body>
-    <div class="board-list">
-      <h1>Available scrum boards</h1>
-      <a href="/b/b685c036049f6c2f35cc1b03af6815b352b8557e">Demo Scrum Board</a>
+    <div class="login-card">
+      <a href="/login/github">
+        <i class="fa fa-github" aria-hidden="true"></i>
+        <p>authenticate with GitHub account</p>
+      </a>
     </div>
   </body>
 </html>

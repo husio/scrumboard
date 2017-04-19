@@ -1,3 +1,8 @@
+body, html {
+	margin: 0;
+	padding: 0;
+}
+
 body {
 	background: #EFEFEF;
 	font-family: monospace;
@@ -132,6 +137,8 @@ a {
 .avatar {
 	margin: 0 2px -4px 2px;
 	border-radius: 4px;
+	width: 18px;
+	height: 18px;
 }
 
 .drop-helper {
@@ -150,4 +157,106 @@ a {
 }
 .footer a {
 	color: #CACACA;
+}
+
+.icelog {
+	box-sizing: border-box;
+	min-width: 200px;
+	max-width: 600px;
+	width: 50%;
+	height: 100%;
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 10;
+	background: #FFF;
+	border-left: 1px solid #DEDEDE;
+	overflow: hidden;
+	box-shadow: 0 0px 14px 2px #333;
+}
+
+.icelog-issues {
+	box-sizing: border-box;
+	height: calc(100% - 80px); /* minus toolbar */
+	background: #FFF;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding-bottom: 80px;
+}
+
+.icelog .card {
+	margin: 10px 4px;
+}
+
+.toggle-icelog-btn {
+	font-size: 32px;
+	color: #797979;
+	position: absolute;
+	top: 15px;
+	right: 20px;
+}
+
+.toggle-icelog-btn:hover {
+	color: #43749A;
+}
+
+.icelog-toolbar {
+	box-sizing: border-box;
+	padding: 10px;
+	height: 80px;
+	font-size: 18px;
+}
+
+.icelog-toolbar input,
+.icelog-toolbar button {
+	box-sizing: border-box;
+	border: 1px solid #ddd;
+	font-size: 20px;
+	padding: 3px 8px;
+	height: 36px;
+}
+
+.icelog-toolbar-help {
+	font-size: 11px;
+	padding: 0 4px;
+}
+
+.icelog-query {
+	width: calc(100% - 120px);
+}
+
+.icelog-query-btn {
+	width: 50px;
+}
+
+
+/* board listing */
+.board-list {
+	margin: 40px auto;
+	max-width: 800px;
+	background: #fff;
+	padding: 20px 20px 60px 20px;
+	border-radius: 4px;
+	border: 1px solid #DEDEDE;
+}
+
+
+/* login */
+.login-card {
+	margin: 100px auto;
+	text-align: center;
+	background: #fff;
+	width: 320px;
+	padding: 30px;
+	border-radius: 4px;
+	border: 1px solid #DEDEDE;
+}
+
+.login-card a {
+	outline: 0;
+}
+
+.login-card .fa {
+	font-size: 150px;
+	color: #8A8A8A;
 }

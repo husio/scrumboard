@@ -1,5 +1,7 @@
 module Main exposing (..)
 
+import Array
+import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -8,12 +10,11 @@ import Html5.DragDrop as DragDrop
 import Http
 import Json.Decode exposing (field)
 import Json.Encode
-import Regex
-import Array
-import WebSocket
-import Dict
-import GitHub
 import List.Extra
+import Regex
+import WebSocket
+import GitHub
+import Extra
 
 
 columns : List String
@@ -28,7 +29,14 @@ type alias ProgramFlags =
 
 
 type alias DraggableID =
-    Int
+    { id : Int
+    , url : String
+    }
+
+
+emptyDraggable : DraggableID
+emptyDraggable =
+    { id = 0, url = "http:///issue-without-url" }
 
 
 type alias DroppableID =
@@ -41,7 +49,9 @@ type alias Model =
     { cards : List Card
     , dragDrop : DragDrop.Model DraggableID DroppableID
     , rows : Int
-    , issueInput : IssuePathInput
+    , icelog : List GitHub.Issue
+    , icelogQuery : String
+    , showIcelog : Bool
     , error : Maybe String
     , flags : ProgramFlags
     , githubOrg : String
@@ -49,55 +59,24 @@ type alias Model =
     }
 
 
-type alias IssuePathInput =
-    { value : String
-    , valid : Bool
-    }
-
-
 type alias Card =
     { position : Int
     , order : Int
-    , issue : Issue
-    }
-
-
-type alias Issue =
-    { id : Int
-    , htmlUrl : String
-    , title : String
-    , state : String
-    , comments : Int
-    , body : String
-    , labels : List IssueLabel
-    , url : String
-    , assignees : List IssueUser
-    }
-
-
-type alias IssueUser =
-    { id : Int
-    , login : String
-    , avatarUrl : String
-    }
-
-
-type alias IssueLabel =
-    { name : String
-    , color : String
-    , url : String
+    , issue : GitHub.Issue
     }
 
 
 type Msg
     = DragDrop (DragDrop.Msg DraggableID DroppableID)
-    | IssueInputChanged String
-    | AddIssue
     | DelIssueCard Int
-    | IssueFetched DroppableID (Result Http.Error Issue)
-    | IssueRefreshed DroppableID (Result Http.Error Issue)
+    | IssueFetched DroppableID (Result Http.Error GitHub.Issue)
+    | IssueRefreshed DroppableID (Result Http.Error GitHub.Issue)
     | RepositoriesFetched (Result Http.Error (List GitHub.Repository))
     | GithubOwnerSelected String
+    | QueryIcelog
+    | IcelogSearchChanged String
+    | IcelogFetched (Result Http.Error (List GitHub.Issue))
+    | ShowIcelog Bool
     | CloseError
     | WsMessage String
 
@@ -119,7 +98,9 @@ init flags =
             { cards = []
             , dragDrop = DragDrop.init
             , rows = 3
-            , issueInput = issueInput ""
+            , icelog = []
+            , icelogQuery = ""
+            , showIcelog = True
             , error = Nothing
             , flags = flags
             , githubOrg = ""
@@ -128,22 +109,11 @@ init flags =
 
         fetchReposCmd =
             GitHub.fetchUserRepos flags.githubToken RepositoriesFetched
+
+        fetchIcelog =
+            GitHub.fetchIssues flags.githubToken IcelogFetched
     in
-        ( model, fetchReposCmd )
-
-
-issueInput : String -> IssuePathInput
-issueInput value =
-    let
-        valid =
-            case extractIssueInfo value of
-                Nothing ->
-                    False
-
-                Just _ ->
-                    True
-    in
-        IssuePathInput value valid
+        ( model, Cmd.batch [ fetchReposCmd, fetchIcelog ] )
 
 
 subscriptions : Model -> Sub Msg
@@ -200,14 +170,6 @@ update msg model =
                     in
                         ( m, Cmd.batch cmds )
 
-        AddIssue ->
-            case extractIssueInfo model.issueInput.value of
-                Nothing ->
-                    ( model, Cmd.none )
-
-                Just ( repo, issueId ) ->
-                    ( { model | issueInput = issueInput "" }, fetchGitHubIssue defaultDropId model.flags.githubToken model.githubOrg repo issueId )
-
         IssueFetched position (Ok issue) ->
             let
                 card =
@@ -224,8 +186,23 @@ update msg model =
             in
                 ( m, sendStateSync m )
 
+        QueryIcelog ->
+            ( model, GitHub.searchIssues model.flags.githubToken model.icelogQuery IcelogFetched )
+
+        IcelogSearchChanged query ->
+            ( { model | icelogQuery = query }, Cmd.none )
+
         IssueFetched _ (Err msg) ->
             ( { model | error = Just (toString msg) }, Cmd.none )
+
+        IcelogFetched (Ok issues) ->
+            ( { model | icelog = issues }, Cmd.none )
+
+        IcelogFetched (Err msg) ->
+            ( { model | error = Just (toString msg) }, Cmd.none )
+
+        ShowIcelog show ->
+            ( { model | showIcelog = show }, Cmd.none )
 
         IssueRefreshed position (Ok issue) ->
             let
@@ -246,32 +223,28 @@ update msg model =
         IssueRefreshed _ (Err msg) ->
             ( { model | error = Just (toString msg) }, Cmd.none )
 
-        IssueInputChanged val ->
-            ( { model | issueInput = issueInput val }, Cmd.none )
-
         DragDrop dragMsg ->
             let
                 ( dragModel, result ) =
                     DragDrop.updateSticky dragMsg model.dragDrop
 
-                ( _, sync ) =
-                    case result of
-                        Nothing ->
-                            ( model.cards, False )
-
-                        Just ( dragId, dropId ) ->
-                            ( moveCardTo dropId dragId model.cards, True )
-
                 dragId =
                     DragDrop.getDragId dragModel
-                        |> Maybe.withDefault -1
+                        |> Maybe.withDefault emptyDraggable
 
                 dropId =
                     DragDrop.getDropId dragModel
                         |> Maybe.withDefault defaultDropId
 
-                cards =
-                    moveCardTo dropId dragId model.cards
+                ( cards, cardCmd ) =
+                    if hasCard dragId model.cards then
+                        moveCardTo dropId dragId model.cards
+                    else if dragId == emptyDraggable then
+                        -- ignore if reciving empty draggable that does not
+                        -- represent real github issue card
+                        ( model.cards, Cmd.none )
+                    else
+                        addCardTo model.flags.githubToken dropId dragId model.cards
 
                 m =
                     adjustRowNumber
@@ -280,7 +253,7 @@ update msg model =
                             , cards = tidyCards cards
                         }
 
-                cmd =
+                syncCmd =
                     case result of
                         Just _ ->
                             sendStateSync m
@@ -288,7 +261,7 @@ update msg model =
                         Nothing ->
                             Cmd.none
             in
-                ( m, cmd )
+                ( m, Cmd.batch [ syncCmd, cardCmd ] )
 
         DelIssueCard issueId ->
             let
@@ -384,21 +357,23 @@ view model =
                         [ span [ class "pull-right", onClick CloseError ] [ icon "times" ]
                         , text msg
                         ]
+
+        icelog =
+            if model.showIcelog then
+                viewIcelog model
+            else
+                text ""
     in
         div []
             [ error
             , div []
-                [ label [] [ text "Add issue from " ]
-                , viewGithubOwnerSelector model.repositories
-                , input
-                    [ onEnter AddIssue
-                    , onInput IssueInputChanged
-                    , value model.issueInput.value
-                    , placeholder "<project>/<issue-id>"
-                    , autofocus True
+                [ span
+                    [ class "toggle-icelog-btn"
+                    , onClick (ShowIcelog (not model.showIcelog))
+                    , title "Toggle icelog"
                     ]
-                    []
-                , button [ onClick AddIssue, disabled (not model.issueInput.valid || model.githubOrg == "") ] [ text "Add issue to the board" ]
+                    [ icon "list" ]
+                , icelog
                 , div [ class "board" ] (viewHeaders columns :: rows)
                 ]
             , div
@@ -443,18 +418,6 @@ viewGithubOwnerSelector repositories =
         select [ selectEvent ] options
 
 
-onEnter : Msg -> Attribute Msg
-onEnter msg =
-    let
-        isEnter code =
-            if code == 13 then
-                Json.Decode.succeed msg
-            else
-                Json.Decode.fail ""
-    in
-        on "keydown" (Json.Decode.andThen isEnter keyCode)
-
-
 isNothing : Maybe a -> Bool
 isNothing maybe =
     case maybe of
@@ -463,6 +426,85 @@ isNothing maybe =
 
         Nothing ->
             True
+
+
+viewIcelog : Model -> Html Msg
+viewIcelog model =
+    let
+        icelogIssues =
+            List.map viewIcelogIssue model.icelog
+    in
+        div [ class "icelog" ]
+            [ div [ class "icelog-toolbar" ]
+                [ input
+                    [ Extra.onEnter QueryIcelog
+                    , Extra.onEsc (ShowIcelog False)
+                    , class "icelog-query"
+                    , onInput IcelogSearchChanged
+                    , placeholder "Search GitHub issues"
+                    , value model.icelogQuery
+                    , autofocus True
+                    ]
+                    []
+                , button
+                    [ onClick QueryIcelog
+                    , class "icelog-query-btn"
+                    ]
+                    [ icon "search" ]
+                , p [ class "icelog-toolbar-help" ]
+                    [ text "You can use "
+                    , a [ target "_blank", href "https://help.github.com/articles/searching-issues/" ] [ text "advanced search" ]
+                    , text " formatting."
+                    ]
+                , span
+                    [ class "toggle-icelog-btn"
+                    , onClick (ShowIcelog False)
+                    , title "Hide icelog"
+                    ]
+                    [ icon "list" ]
+                ]
+            , div [ class "icelog-issues" ] icelogIssues
+            ]
+
+
+viewIcelogIssue : GitHub.Issue -> Html Msg
+viewIcelogIssue issue =
+    let
+        assignees =
+            List.map viewAssignee issue.assignees
+
+        labels =
+            List.map viewLabel issue.labels
+
+        dragattr =
+            DragDrop.draggable DragDrop <| issueDragId issue
+
+        attrs =
+            cardBorder issue :: class "card" :: dragattr
+    in
+        div attrs
+            [ a
+                [ title issue.body
+                , class ("card-title state-" ++ issue.state)
+                , href issue.htmlUrl
+                , target "_blank"
+                ]
+                [ text issue.title ]
+            , div [ class "card-meta" ]
+                (labels
+                    ++ [ div [ class "card-metainfo" ]
+                            assignees
+                       , div [ class "card-metainfo" ]
+                            [ text <| issueLocation issue.url
+                            , icon "code-fork"
+                            ]
+                       , div [ class "card-metainfo" ]
+                            [ text (toString issue.comments)
+                            , icon "comments-o"
+                            ]
+                       ]
+                )
+            ]
 
 
 viewHeaders : List String -> Html Msg
@@ -541,19 +583,8 @@ onlyContained dropId cards =
 viewCard : Maybe DraggableID -> Card -> Html Msg
 viewCard dragId card =
     let
-        color =
-            case List.head card.issue.labels of
-                Nothing ->
-                    "#C2E4EF"
-
-                Just label ->
-                    "#" ++ label.color
-
-        css =
-            style [ ( "border-left", "6px solid " ++ color ) ]
-
         placeholderClass =
-            if Maybe.withDefault 0 dragId == cardDragId card then
+            if Maybe.withDefault emptyDraggable dragId == cardDragId card then
                 class "card-placeholder"
             else
                 class ""
@@ -565,7 +596,7 @@ viewCard dragId card =
             DragDrop.droppable DragDrop <| cardDropId card
 
         attrs =
-            (placeholderClass :: css :: class "card" :: dragattr) ++ dropAttrs
+            (placeholderClass :: cardBorder card.issue :: class "card" :: dragattr) ++ dropAttrs
 
         labels =
             List.map viewLabel card.issue.labels
@@ -604,7 +635,21 @@ viewCard dragId card =
             ]
 
 
-viewAssignee : IssueUser -> Html Msg
+cardBorder : GitHub.Issue -> Attribute Msg
+cardBorder issue =
+    let
+        color =
+            case List.head issue.labels of
+                Nothing ->
+                    "#C2E4EF"
+
+                Just label ->
+                    "#" ++ label.color
+    in
+        style [ ( "border-left", "6px solid " ++ color ) ]
+
+
+viewAssignee : GitHub.User -> Html Msg
 viewAssignee user =
     let
         url =
@@ -613,7 +658,7 @@ viewAssignee user =
         img [ src url, class "avatar" ] []
 
 
-viewLabel : IssueLabel -> Html Msg
+viewLabel : GitHub.IssueLabel -> Html Msg
 viewLabel label =
     let
         attrs =
@@ -689,11 +734,12 @@ fetchGitHubIssue position token organization repo issueId =
 
 refreshGithubIssue : DroppableID -> String -> String -> Cmd Msg
 refreshGithubIssue position token cardUrl =
-    let
-        url =
-            cardUrl ++ "?access_token=" ++ token
-    in
-        Http.send (IssueRefreshed position) (Http.get url GitHub.decodeIssue)
+    GitHub.fetchIssueUrl token cardUrl (IssueRefreshed position)
+
+
+fetchGitHubIssueUrl : DroppableID -> String -> String -> Cmd Msg
+fetchGitHubIssueUrl position token cardUrl =
+    GitHub.fetchIssueUrl token cardUrl (IssueFetched position)
 
 
 encodeState : Model -> Json.Encode.Value
@@ -761,7 +807,12 @@ icon name =
 
 cardDragId : Card -> DraggableID
 cardDragId card =
-    card.issue.id
+    issueDragId card.issue
+
+
+issueDragId : GitHub.Issue -> DraggableID
+issueDragId issue =
+    { id = issue.id, url = issue.url }
 
 
 cardDropId : Card -> DroppableID
@@ -769,17 +820,31 @@ cardDropId card =
     DroppableID card.position card.order
 
 
-moveCardTo : DroppableID -> DraggableID -> List Card -> List Card
-moveCardTo dropId cardId cards =
+hasCard : DraggableID -> List Card -> Bool
+hasCard drag cards =
+    List.any (\c -> c.issue.id == drag.id) cards
+
+
+moveCardTo : DroppableID -> DraggableID -> List Card -> ( List Card, Cmd Msg )
+moveCardTo dropId drag cards =
     let
         updatePosition : Card -> Card
         updatePosition c =
-            if c.issue.id == cardId then
+            if c.issue.id == drag.id then
                 { c | position = dropId.position, order = dropId.order }
             else
                 c
     in
-        List.map updatePosition cards
+        ( List.map updatePosition cards, Cmd.none )
+
+
+addCardTo : String -> DroppableID -> DraggableID -> List Card -> ( List Card, Cmd Msg )
+addCardTo githubToken dropId drop cards =
+    let
+        cmd =
+            fetchGitHubIssueUrl dropId githubToken drop.url
+    in
+        ( cards, cmd )
 
 
 defaultDropId : DroppableID

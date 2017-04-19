@@ -45,7 +45,12 @@ func (app *AuthApp) login(w http.ResponseWriter, r *http.Request) {
 		app.html.RenderDefault(w, http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, "/login/"+p.Codename, http.StatusTemporaryRedirect)
+	content := struct {
+		Debug bool
+	}{
+		Debug: app.debug,
+	}
+	app.html.Render(w, http.StatusOK, "login.tmpl", content)
 }
 
 func (app *AuthApp) loginOAuth2(w http.ResponseWriter, r *http.Request) {

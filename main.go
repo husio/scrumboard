@@ -39,7 +39,7 @@ func main() {
 		auth.GithubProvider(!debug, githubClientId, githubSecret),
 	}
 	cache := cache.NewRedisCache(redisPool)
-	authApp := auth.NewApp(cache, html, providers)
+	authApp := auth.NewApp(cache, html, providers, debug)
 	hub := pubsub.Snapshot(redisPool, pubsub.NewMemoryHub())
 	scrumBoardApp := scrumboard.NewApp(html, authApp, hub, debug)
 
