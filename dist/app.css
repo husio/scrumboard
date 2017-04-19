@@ -29,7 +29,7 @@ a {
 	display: flex;
 	border: 1px solid #EAEAEA;
 	border-top: 1px solid #E2E2E2;
-	margin: 10px;
+	margin: 10px 0;
 	padding: 8px;
 	background: #FBFBFB;
 }
@@ -159,13 +159,13 @@ a {
 	color: #CACACA;
 }
 
-.icelog {
+.icelog-sidebar {
 	box-sizing: border-box;
 	min-width: 200px;
 	max-width: 600px;
-	width: 50%;
+	width: 80%;
 	height: 100%;
-	position: absolute;
+	position: fixed;
 	top: 0;
 	right: 0;
 	z-index: 10;

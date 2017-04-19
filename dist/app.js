@@ -11674,7 +11674,6 @@ var _user$project$GitHub$searchIssues = F3(
 			A2(_elm_lang$http$Http$get, url, _user$project$GitHub$decodeSearch));
 	});
 
-var _user$project$Main$defaultDropId = {position: 1, order: 0};
 var _user$project$Main$moveCardTo = F3(
 	function (dropId, drag, cards) {
 		var updatePosition = function (c) {
@@ -11980,6 +11979,7 @@ var _user$project$Main$tidyCards = function (cards) {
 	var sorted = _user$project$Main$sortCards(cards);
 	return A3(_elm_lang$core$List$map2, reorder, orders, sorted);
 };
+var _user$project$Main$emptyDroppable = {position: 1, order: 0};
 var _user$project$Main$emptyDraggable = {id: 0, url: 'http:///issue-without-url'};
 var _user$project$Main$columns = {
 	ctor: '::',
@@ -12467,7 +12467,7 @@ var _user$project$Main$update = F2(
 					_norpan$elm_html5_drag_drop$Html5_DragDrop$getDragId(dragModel));
 				var dropId = A2(
 					_elm_lang$core$Maybe$withDefault,
-					_user$project$Main$defaultDropId,
+					_user$project$Main$emptyDroppable,
 					_norpan$elm_html5_drag_drop$Html5_DragDrop$getDropId(dragModel));
 				var _p16 = A2(_user$project$Main$hasCard, dragId, model.cards) ? A3(_user$project$Main$moveCardTo, dropId, dragId, model.cards) : (_elm_lang$core$Native_Utils.eq(dragId, _user$project$Main$emptyDraggable) ? {ctor: '_Tuple2', _0: model.cards, _1: _elm_lang$core$Platform_Cmd$none} : A4(_user$project$Main$addCardTo, model.flags.githubToken, dropId, dragId, model.cards));
 				var cards = _p16._0;
@@ -12645,7 +12645,7 @@ var _user$project$Main$viewIcelog = function (model) {
 		_elm_lang$html$Html$div,
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('icelog'),
+			_0: _elm_lang$html$Html_Attributes$class('icelog-sidebar'),
 			_1: {ctor: '[]'}
 		},
 		{
@@ -13013,7 +13013,6 @@ var _user$project$Main$viewRow = F3(
 			dropzones);
 	});
 var _user$project$Main$view = function (model) {
-	var icelog = model.showIcelog ? _user$project$Main$viewIcelog(model) : _elm_lang$html$Html$text('');
 	var error = function () {
 		var _p20 = model.error;
 		if (_p20.ctor === 'Nothing') {
@@ -13056,6 +13055,7 @@ var _user$project$Main$view = function (model) {
 		}
 	}();
 	var dragId = _norpan$elm_html5_drag_drop$Html5_DragDrop$getDragId(model.dragDrop);
+	var icelog = (model.showIcelog && _user$project$Main$isNothing(dragId)) ? _user$project$Main$viewIcelog(model) : _elm_lang$html$Html$text('');
 	var clen = _elm_lang$core$List$length(_user$project$Main$columns);
 	var row = function (beginPos) {
 		return A3(

@@ -45,6 +45,11 @@ type alias DroppableID =
     }
 
 
+emptyDroppable : DroppableID
+emptyDroppable =
+    { position = 1, order = 0 }
+
+
 type alias Model =
     { cards : List Card
     , dragDrop : DragDrop.Model DraggableID DroppableID
@@ -234,7 +239,7 @@ update msg model =
 
                 dropId =
                     DragDrop.getDropId dragModel
-                        |> Maybe.withDefault defaultDropId
+                        |> Maybe.withDefault emptyDroppable
 
                 ( cards, cardCmd ) =
                     if hasCard dragId model.cards then
@@ -359,7 +364,7 @@ view model =
                         ]
 
         icelog =
-            if model.showIcelog then
+            if model.showIcelog && isNothing dragId then
                 viewIcelog model
             else
                 text ""
@@ -434,7 +439,7 @@ viewIcelog model =
         icelogIssues =
             List.map viewIcelogIssue model.icelog
     in
-        div [ class "icelog" ]
+        div [ class "icelog-sidebar" ]
             [ div [ class "icelog-toolbar" ]
                 [ input
                     [ Extra.onEnter QueryIcelog
@@ -845,8 +850,3 @@ addCardTo githubToken dropId drop cards =
             fetchGitHubIssueUrl dropId githubToken drop.url
     in
         ( cards, cmd )
-
-
-defaultDropId : DroppableID
-defaultDropId =
-    { position = 1, order = 0 }
