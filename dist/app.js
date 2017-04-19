@@ -12168,7 +12168,7 @@ var _user$project$Main$init = function (flags) {
 		rows: 3,
 		icelog: {ctor: '[]'},
 		icelogQuery: '',
-		showIcelog: true,
+		showIcelog: false,
 		error: _elm_lang$core$Maybe$Nothing,
 		flags: flags,
 		githubOrg: '',
