@@ -52,6 +52,8 @@ func GithubProvider(useHttps bool, clientID, clientSecret string) Provider {
 			TokenURL: "https://github.com/login/oauth/access_token",
 		},
 		// https://developer.github.com/v3/oauth/#scopes
-		scopes: []string{"email", "public_repo", "repo"},
+		//
+		// scopes: []string{"email", "public_repo", "repo"},
+		scopes: []string{"email", "public_repo"},
 	}
 }

@@ -19,6 +19,7 @@ a {
 	border: 2px solid #D68888;
 	padding: 20px;
 	margin: 30px;
+	z-index: 20;
 }
 
 .board {
