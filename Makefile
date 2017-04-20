@@ -4,13 +4,11 @@ app.js:
 
 app.min.js: app.js
 	cd dist; \
-	curl -X POST -s --data-urlencode 'input@app.js' https://javascript-minifier.com/raw \
-	        > app.min.js
+	uglify -s dist/app.js -o dist/app.min.js
 
 app.min.css:
 	cd dist; \
-	curl -X POST -s --data-urlencode 'input@app.css' https://cssminifier.com/raw \
-		> app.min.css
+	uglify -s dist/app.css -o dist/app.min.css
 
 dist: app.min.js app.min.css
 
