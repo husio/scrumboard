@@ -8340,1520 +8340,6 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
-var _elm_community$html_extra$Html_Events_Extra$onEnter = function (onEnterAction) {
-	return A2(
-		_elm_lang$html$Html_Events$on,
-		'keyup',
-		A2(
-			_elm_lang$core$Json_Decode$andThen,
-			function (keyCode) {
-				return _elm_lang$core$Native_Utils.eq(keyCode, 13) ? _elm_lang$core$Json_Decode$succeed(onEnterAction) : _elm_lang$core$Json_Decode$fail(
-					_elm_lang$core$Basics$toString(keyCode));
-			},
-			_elm_lang$html$Html_Events$keyCode));
-};
-var _elm_community$html_extra$Html_Events_Extra$onClickPreventDefaultAndStopPropagation = function (msg) {
-	return A3(
-		_elm_lang$html$Html_Events$onWithOptions,
-		'click',
-		_elm_lang$core$Native_Utils.update(
-			_elm_lang$html$Html_Events$defaultOptions,
-			{stopPropagation: true, preventDefault: true}),
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_community$html_extra$Html_Events_Extra$onClickStopPropagation = function (msg) {
-	return A3(
-		_elm_lang$html$Html_Events$onWithOptions,
-		'click',
-		_elm_lang$core$Native_Utils.update(
-			_elm_lang$html$Html_Events$defaultOptions,
-			{stopPropagation: true}),
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_community$html_extra$Html_Events_Extra$onClickPreventDefault = function (msg) {
-	return A3(
-		_elm_lang$html$Html_Events$onWithOptions,
-		'click',
-		_elm_lang$core$Native_Utils.update(
-			_elm_lang$html$Html_Events$defaultOptions,
-			{preventDefault: true}),
-		_elm_lang$core$Json_Decode$succeed(msg));
-};
-var _elm_community$html_extra$Html_Events_Extra$targetSelectedIndex = A2(
-	_elm_lang$core$Json_Decode$at,
-	{
-		ctor: '::',
-		_0: 'target',
-		_1: {
-			ctor: '::',
-			_0: 'selectedIndex',
-			_1: {ctor: '[]'}
-		}
-	},
-	A2(
-		_elm_lang$core$Json_Decode$map,
-		function ($int) {
-			return _elm_lang$core$Native_Utils.eq($int, -1) ? _elm_lang$core$Maybe$Nothing : _elm_lang$core$Maybe$Just($int);
-		},
-		_elm_lang$core$Json_Decode$int));
-var _elm_community$html_extra$Html_Events_Extra$targetValueInt = A2(
-	_elm_lang$core$Json_Decode$at,
-	{
-		ctor: '::',
-		_0: 'target',
-		_1: {
-			ctor: '::',
-			_0: 'valueAsNumber',
-			_1: {ctor: '[]'}
-		}
-	},
-	_elm_lang$core$Json_Decode$int);
-var _elm_community$html_extra$Html_Events_Extra$customDecoder = F2(
-	function (d, f) {
-		var resultDecoder = function (x) {
-			var _p0 = x;
-			if (_p0.ctor === 'Ok') {
-				return _elm_lang$core$Json_Decode$succeed(_p0._0);
-			} else {
-				return _elm_lang$core$Json_Decode$fail(_p0._0);
-			}
-		};
-		return A2(
-			_elm_lang$core$Json_Decode$andThen,
-			resultDecoder,
-			A2(_elm_lang$core$Json_Decode$map, f, d));
-	});
-var _elm_community$html_extra$Html_Events_Extra$targetValueFloat = A2(
-	_elm_community$html_extra$Html_Events_Extra$customDecoder,
-	A2(
-		_elm_lang$core$Json_Decode$at,
-		{
-			ctor: '::',
-			_0: 'target',
-			_1: {
-				ctor: '::',
-				_0: 'valueAsNumber',
-				_1: {ctor: '[]'}
-			}
-		},
-		_elm_lang$core$Json_Decode$float),
-	function (v) {
-		return _elm_lang$core$Basics$isNaN(v) ? _elm_lang$core$Result$Err('Not a number') : _elm_lang$core$Result$Ok(v);
-	});
-var _elm_community$html_extra$Html_Events_Extra$targetValueMaybe = A2(
-	_elm_community$html_extra$Html_Events_Extra$customDecoder,
-	_elm_lang$html$Html_Events$targetValue,
-	function (s) {
-		return _elm_lang$core$Result$Ok(
-			_elm_lang$core$Native_Utils.eq(s, '') ? _elm_lang$core$Maybe$Nothing : _elm_lang$core$Maybe$Just(s));
-	});
-var _elm_community$html_extra$Html_Events_Extra$targetValueMaybeFloat = A2(
-	_elm_lang$core$Json_Decode$andThen,
-	function (mval) {
-		var _p1 = mval;
-		if (_p1.ctor === 'Nothing') {
-			return _elm_lang$core$Json_Decode$succeed(_elm_lang$core$Maybe$Nothing);
-		} else {
-			return A2(_elm_lang$core$Json_Decode$map, _elm_lang$core$Maybe$Just, _elm_community$html_extra$Html_Events_Extra$targetValueFloat);
-		}
-	},
-	_elm_community$html_extra$Html_Events_Extra$targetValueMaybe);
-var _elm_community$html_extra$Html_Events_Extra$targetValueMaybeInt = function () {
-	var traverse = F2(
-		function (f, mx) {
-			var _p2 = mx;
-			if (_p2.ctor === 'Nothing') {
-				return _elm_lang$core$Result$Ok(_elm_lang$core$Maybe$Nothing);
-			} else {
-				return A2(
-					_elm_lang$core$Result$map,
-					_elm_lang$core$Maybe$Just,
-					f(_p2._0));
-			}
-		});
-	return A2(
-		_elm_community$html_extra$Html_Events_Extra$customDecoder,
-		_elm_community$html_extra$Html_Events_Extra$targetValueMaybe,
-		traverse(_elm_lang$core$String$toInt));
-}();
-var _elm_community$html_extra$Html_Events_Extra$targetValueFloatParse = A2(_elm_community$html_extra$Html_Events_Extra$customDecoder, _elm_lang$html$Html_Events$targetValue, _elm_lang$core$String$toFloat);
-var _elm_community$html_extra$Html_Events_Extra$targetValueIntParse = A2(_elm_community$html_extra$Html_Events_Extra$customDecoder, _elm_lang$html$Html_Events$targetValue, _elm_lang$core$String$toInt);
-var _elm_community$html_extra$Html_Events_Extra$targetValueMaybeFloatParse = function () {
-	var traverse = F2(
-		function (f, mx) {
-			var _p3 = mx;
-			if (_p3.ctor === 'Nothing') {
-				return _elm_lang$core$Result$Ok(_elm_lang$core$Maybe$Nothing);
-			} else {
-				return A2(
-					_elm_lang$core$Result$map,
-					_elm_lang$core$Maybe$Just,
-					f(_p3._0));
-			}
-		});
-	return A2(
-		_elm_community$html_extra$Html_Events_Extra$customDecoder,
-		_elm_community$html_extra$Html_Events_Extra$targetValueMaybe,
-		traverse(_elm_lang$core$String$toFloat));
-}();
-var _elm_community$html_extra$Html_Events_Extra$targetValueMaybeIntParse = function () {
-	var traverse = F2(
-		function (f, mx) {
-			var _p4 = mx;
-			if (_p4.ctor === 'Nothing') {
-				return _elm_lang$core$Result$Ok(_elm_lang$core$Maybe$Nothing);
-			} else {
-				return A2(
-					_elm_lang$core$Result$map,
-					_elm_lang$core$Maybe$Just,
-					f(_p4._0));
-			}
-		});
-	return A2(
-		_elm_community$html_extra$Html_Events_Extra$customDecoder,
-		_elm_community$html_extra$Html_Events_Extra$targetValueMaybe,
-		traverse(_elm_lang$core$String$toInt));
-}();
-var _elm_community$html_extra$Html_Events_Extra$charCode = A2(
-	_elm_lang$core$Json_Decode$map,
-	function (_p5) {
-		return A2(
-			_elm_lang$core$Maybe$map,
-			_elm_lang$core$Tuple$first,
-			_elm_lang$core$String$uncons(_p5));
-	},
-	A2(_elm_lang$core$Json_Decode$field, 'charCode', _elm_lang$core$Json_Decode$string));
-
-var _elm_lang$core$Set$foldr = F3(
-	function (f, b, _p0) {
-		var _p1 = _p0;
-		return A3(
-			_elm_lang$core$Dict$foldr,
-			F3(
-				function (k, _p2, b) {
-					return A2(f, k, b);
-				}),
-			b,
-			_p1._0);
-	});
-var _elm_lang$core$Set$foldl = F3(
-	function (f, b, _p3) {
-		var _p4 = _p3;
-		return A3(
-			_elm_lang$core$Dict$foldl,
-			F3(
-				function (k, _p5, b) {
-					return A2(f, k, b);
-				}),
-			b,
-			_p4._0);
-	});
-var _elm_lang$core$Set$toList = function (_p6) {
-	var _p7 = _p6;
-	return _elm_lang$core$Dict$keys(_p7._0);
-};
-var _elm_lang$core$Set$size = function (_p8) {
-	var _p9 = _p8;
-	return _elm_lang$core$Dict$size(_p9._0);
-};
-var _elm_lang$core$Set$member = F2(
-	function (k, _p10) {
-		var _p11 = _p10;
-		return A2(_elm_lang$core$Dict$member, k, _p11._0);
-	});
-var _elm_lang$core$Set$isEmpty = function (_p12) {
-	var _p13 = _p12;
-	return _elm_lang$core$Dict$isEmpty(_p13._0);
-};
-var _elm_lang$core$Set$Set_elm_builtin = function (a) {
-	return {ctor: 'Set_elm_builtin', _0: a};
-};
-var _elm_lang$core$Set$empty = _elm_lang$core$Set$Set_elm_builtin(_elm_lang$core$Dict$empty);
-var _elm_lang$core$Set$singleton = function (k) {
-	return _elm_lang$core$Set$Set_elm_builtin(
-		A2(
-			_elm_lang$core$Dict$singleton,
-			k,
-			{ctor: '_Tuple0'}));
-};
-var _elm_lang$core$Set$insert = F2(
-	function (k, _p14) {
-		var _p15 = _p14;
-		return _elm_lang$core$Set$Set_elm_builtin(
-			A3(
-				_elm_lang$core$Dict$insert,
-				k,
-				{ctor: '_Tuple0'},
-				_p15._0));
-	});
-var _elm_lang$core$Set$fromList = function (xs) {
-	return A3(_elm_lang$core$List$foldl, _elm_lang$core$Set$insert, _elm_lang$core$Set$empty, xs);
-};
-var _elm_lang$core$Set$map = F2(
-	function (f, s) {
-		return _elm_lang$core$Set$fromList(
-			A2(
-				_elm_lang$core$List$map,
-				f,
-				_elm_lang$core$Set$toList(s)));
-	});
-var _elm_lang$core$Set$remove = F2(
-	function (k, _p16) {
-		var _p17 = _p16;
-		return _elm_lang$core$Set$Set_elm_builtin(
-			A2(_elm_lang$core$Dict$remove, k, _p17._0));
-	});
-var _elm_lang$core$Set$union = F2(
-	function (_p19, _p18) {
-		var _p20 = _p19;
-		var _p21 = _p18;
-		return _elm_lang$core$Set$Set_elm_builtin(
-			A2(_elm_lang$core$Dict$union, _p20._0, _p21._0));
-	});
-var _elm_lang$core$Set$intersect = F2(
-	function (_p23, _p22) {
-		var _p24 = _p23;
-		var _p25 = _p22;
-		return _elm_lang$core$Set$Set_elm_builtin(
-			A2(_elm_lang$core$Dict$intersect, _p24._0, _p25._0));
-	});
-var _elm_lang$core$Set$diff = F2(
-	function (_p27, _p26) {
-		var _p28 = _p27;
-		var _p29 = _p26;
-		return _elm_lang$core$Set$Set_elm_builtin(
-			A2(_elm_lang$core$Dict$diff, _p28._0, _p29._0));
-	});
-var _elm_lang$core$Set$filter = F2(
-	function (p, _p30) {
-		var _p31 = _p30;
-		return _elm_lang$core$Set$Set_elm_builtin(
-			A2(
-				_elm_lang$core$Dict$filter,
-				F2(
-					function (k, _p32) {
-						return p(k);
-					}),
-				_p31._0));
-	});
-var _elm_lang$core$Set$partition = F2(
-	function (p, _p33) {
-		var _p34 = _p33;
-		var _p35 = A2(
-			_elm_lang$core$Dict$partition,
-			F2(
-				function (k, _p36) {
-					return p(k);
-				}),
-			_p34._0);
-		var p1 = _p35._0;
-		var p2 = _p35._1;
-		return {
-			ctor: '_Tuple2',
-			_0: _elm_lang$core$Set$Set_elm_builtin(p1),
-			_1: _elm_lang$core$Set$Set_elm_builtin(p2)
-		};
-	});
-
-var _elm_community$list_extra$List_Extra$greedyGroupsOfWithStep = F3(
-	function (size, step, xs) {
-		var okayXs = _elm_lang$core$Native_Utils.cmp(
-			_elm_lang$core$List$length(xs),
-			0) > 0;
-		var okayArgs = (_elm_lang$core$Native_Utils.cmp(size, 0) > 0) && (_elm_lang$core$Native_Utils.cmp(step, 0) > 0);
-		var xs_ = A2(_elm_lang$core$List$drop, step, xs);
-		var group = A2(_elm_lang$core$List$take, size, xs);
-		return (okayArgs && okayXs) ? {
-			ctor: '::',
-			_0: group,
-			_1: A3(_elm_community$list_extra$List_Extra$greedyGroupsOfWithStep, size, step, xs_)
-		} : {ctor: '[]'};
-	});
-var _elm_community$list_extra$List_Extra$greedyGroupsOf = F2(
-	function (size, xs) {
-		return A3(_elm_community$list_extra$List_Extra$greedyGroupsOfWithStep, size, size, xs);
-	});
-var _elm_community$list_extra$List_Extra$groupsOfWithStep = F3(
-	function (size, step, xs) {
-		var okayArgs = (_elm_lang$core$Native_Utils.cmp(size, 0) > 0) && (_elm_lang$core$Native_Utils.cmp(step, 0) > 0);
-		var xs_ = A2(_elm_lang$core$List$drop, step, xs);
-		var group = A2(_elm_lang$core$List$take, size, xs);
-		var okayLength = _elm_lang$core$Native_Utils.eq(
-			size,
-			_elm_lang$core$List$length(group));
-		return (okayArgs && okayLength) ? {
-			ctor: '::',
-			_0: group,
-			_1: A3(_elm_community$list_extra$List_Extra$groupsOfWithStep, size, step, xs_)
-		} : {ctor: '[]'};
-	});
-var _elm_community$list_extra$List_Extra$groupsOf = F2(
-	function (size, xs) {
-		return A3(_elm_community$list_extra$List_Extra$groupsOfWithStep, size, size, xs);
-	});
-var _elm_community$list_extra$List_Extra$zip5 = _elm_lang$core$List$map5(
-	F5(
-		function (v0, v1, v2, v3, v4) {
-			return {ctor: '_Tuple5', _0: v0, _1: v1, _2: v2, _3: v3, _4: v4};
-		}));
-var _elm_community$list_extra$List_Extra$zip4 = _elm_lang$core$List$map4(
-	F4(
-		function (v0, v1, v2, v3) {
-			return {ctor: '_Tuple4', _0: v0, _1: v1, _2: v2, _3: v3};
-		}));
-var _elm_community$list_extra$List_Extra$zip3 = _elm_lang$core$List$map3(
-	F3(
-		function (v0, v1, v2) {
-			return {ctor: '_Tuple3', _0: v0, _1: v1, _2: v2};
-		}));
-var _elm_community$list_extra$List_Extra$zip = _elm_lang$core$List$map2(
-	F2(
-		function (v0, v1) {
-			return {ctor: '_Tuple2', _0: v0, _1: v1};
-		}));
-var _elm_community$list_extra$List_Extra$isPrefixOf = F2(
-	function (prefix, xs) {
-		var _p0 = {ctor: '_Tuple2', _0: prefix, _1: xs};
-		if (_p0._0.ctor === '[]') {
-			return true;
-		} else {
-			if (_p0._1.ctor === '[]') {
-				return false;
-			} else {
-				return _elm_lang$core$Native_Utils.eq(_p0._0._0, _p0._1._0) && A2(_elm_community$list_extra$List_Extra$isPrefixOf, _p0._0._1, _p0._1._1);
-			}
-		}
-	});
-var _elm_community$list_extra$List_Extra$isSuffixOf = F2(
-	function (suffix, xs) {
-		return A2(
-			_elm_community$list_extra$List_Extra$isPrefixOf,
-			_elm_lang$core$List$reverse(suffix),
-			_elm_lang$core$List$reverse(xs));
-	});
-var _elm_community$list_extra$List_Extra$selectSplit = function (xs) {
-	var _p1 = xs;
-	if (_p1.ctor === '[]') {
-		return {ctor: '[]'};
-	} else {
-		var _p5 = _p1._1;
-		var _p4 = _p1._0;
-		return {
-			ctor: '::',
-			_0: {
-				ctor: '_Tuple3',
-				_0: {ctor: '[]'},
-				_1: _p4,
-				_2: _p5
-			},
-			_1: A2(
-				_elm_lang$core$List$map,
-				function (_p2) {
-					var _p3 = _p2;
-					return {
-						ctor: '_Tuple3',
-						_0: {ctor: '::', _0: _p4, _1: _p3._0},
-						_1: _p3._1,
-						_2: _p3._2
-					};
-				},
-				_elm_community$list_extra$List_Extra$selectSplit(_p5))
-		};
-	}
-};
-var _elm_community$list_extra$List_Extra$select = function (xs) {
-	var _p6 = xs;
-	if (_p6.ctor === '[]') {
-		return {ctor: '[]'};
-	} else {
-		var _p10 = _p6._1;
-		var _p9 = _p6._0;
-		return {
-			ctor: '::',
-			_0: {ctor: '_Tuple2', _0: _p9, _1: _p10},
-			_1: A2(
-				_elm_lang$core$List$map,
-				function (_p7) {
-					var _p8 = _p7;
-					return {
-						ctor: '_Tuple2',
-						_0: _p8._0,
-						_1: {ctor: '::', _0: _p9, _1: _p8._1}
-					};
-				},
-				_elm_community$list_extra$List_Extra$select(_p10))
-		};
-	}
-};
-var _elm_community$list_extra$List_Extra$tailsHelp = F2(
-	function (e, list) {
-		var _p11 = list;
-		if (_p11.ctor === '::') {
-			var _p12 = _p11._0;
-			return {
-				ctor: '::',
-				_0: {ctor: '::', _0: e, _1: _p12},
-				_1: {ctor: '::', _0: _p12, _1: _p11._1}
-			};
-		} else {
-			return {ctor: '[]'};
-		}
-	});
-var _elm_community$list_extra$List_Extra$tails = A2(
-	_elm_lang$core$List$foldr,
-	_elm_community$list_extra$List_Extra$tailsHelp,
-	{
-		ctor: '::',
-		_0: {ctor: '[]'},
-		_1: {ctor: '[]'}
-	});
-var _elm_community$list_extra$List_Extra$isInfixOf = F2(
-	function (infix, xs) {
-		return A2(
-			_elm_lang$core$List$any,
-			_elm_community$list_extra$List_Extra$isPrefixOf(infix),
-			_elm_community$list_extra$List_Extra$tails(xs));
-	});
-var _elm_community$list_extra$List_Extra$inits = A2(
-	_elm_lang$core$List$foldr,
-	F2(
-		function (e, acc) {
-			return {
-				ctor: '::',
-				_0: {ctor: '[]'},
-				_1: A2(
-					_elm_lang$core$List$map,
-					F2(
-						function (x, y) {
-							return {ctor: '::', _0: x, _1: y};
-						})(e),
-					acc)
-			};
-		}),
-	{
-		ctor: '::',
-		_0: {ctor: '[]'},
-		_1: {ctor: '[]'}
-	});
-var _elm_community$list_extra$List_Extra$groupWhileTransitively = F2(
-	function (cmp, xs_) {
-		var _p13 = xs_;
-		if (_p13.ctor === '[]') {
-			return {ctor: '[]'};
-		} else {
-			if (_p13._1.ctor === '[]') {
-				return {
-					ctor: '::',
-					_0: {
-						ctor: '::',
-						_0: _p13._0,
-						_1: {ctor: '[]'}
-					},
-					_1: {ctor: '[]'}
-				};
-			} else {
-				var _p15 = _p13._0;
-				var _p14 = A2(_elm_community$list_extra$List_Extra$groupWhileTransitively, cmp, _p13._1);
-				if (_p14.ctor === '::') {
-					return A2(cmp, _p15, _p13._1._0) ? {
-						ctor: '::',
-						_0: {ctor: '::', _0: _p15, _1: _p14._0},
-						_1: _p14._1
-					} : {
-						ctor: '::',
-						_0: {
-							ctor: '::',
-							_0: _p15,
-							_1: {ctor: '[]'}
-						},
-						_1: _p14
-					};
-				} else {
-					return {ctor: '[]'};
-				}
-			}
-		}
-	});
-var _elm_community$list_extra$List_Extra$stripPrefix = F2(
-	function (prefix, xs) {
-		var step = F2(
-			function (e, m) {
-				var _p16 = m;
-				if (_p16.ctor === 'Nothing') {
-					return _elm_lang$core$Maybe$Nothing;
-				} else {
-					if (_p16._0.ctor === '[]') {
-						return _elm_lang$core$Maybe$Nothing;
-					} else {
-						return _elm_lang$core$Native_Utils.eq(e, _p16._0._0) ? _elm_lang$core$Maybe$Just(_p16._0._1) : _elm_lang$core$Maybe$Nothing;
-					}
-				}
-			});
-		return A3(
-			_elm_lang$core$List$foldl,
-			step,
-			_elm_lang$core$Maybe$Just(xs),
-			prefix);
-	});
-var _elm_community$list_extra$List_Extra$dropWhileRight = function (p) {
-	return A2(
-		_elm_lang$core$List$foldr,
-		F2(
-			function (x, xs) {
-				return (p(x) && _elm_lang$core$List$isEmpty(xs)) ? {ctor: '[]'} : {ctor: '::', _0: x, _1: xs};
-			}),
-		{ctor: '[]'});
-};
-var _elm_community$list_extra$List_Extra$takeWhileRight = function (p) {
-	var step = F2(
-		function (x, _p17) {
-			var _p18 = _p17;
-			var _p19 = _p18._0;
-			return (p(x) && _p18._1) ? {
-				ctor: '_Tuple2',
-				_0: {ctor: '::', _0: x, _1: _p19},
-				_1: true
-			} : {ctor: '_Tuple2', _0: _p19, _1: false};
-		});
-	return function (_p20) {
-		return _elm_lang$core$Tuple$first(
-			A3(
-				_elm_lang$core$List$foldr,
-				step,
-				{
-					ctor: '_Tuple2',
-					_0: {ctor: '[]'},
-					_1: true
-				},
-				_p20));
-	};
-};
-var _elm_community$list_extra$List_Extra$splitAt = F2(
-	function (n, xs) {
-		return {
-			ctor: '_Tuple2',
-			_0: A2(_elm_lang$core$List$take, n, xs),
-			_1: A2(_elm_lang$core$List$drop, n, xs)
-		};
-	});
-var _elm_community$list_extra$List_Extra$groupsOfVarying_ = F3(
-	function (listOflengths, list, accu) {
-		groupsOfVarying_:
-		while (true) {
-			var _p21 = {ctor: '_Tuple2', _0: listOflengths, _1: list};
-			if (((_p21.ctor === '_Tuple2') && (_p21._0.ctor === '::')) && (_p21._1.ctor === '::')) {
-				var _p22 = A2(_elm_community$list_extra$List_Extra$splitAt, _p21._0._0, list);
-				var head = _p22._0;
-				var tail = _p22._1;
-				var _v11 = _p21._0._1,
-					_v12 = tail,
-					_v13 = {ctor: '::', _0: head, _1: accu};
-				listOflengths = _v11;
-				list = _v12;
-				accu = _v13;
-				continue groupsOfVarying_;
-			} else {
-				return _elm_lang$core$List$reverse(accu);
-			}
-		}
-	});
-var _elm_community$list_extra$List_Extra$groupsOfVarying = F2(
-	function (listOflengths, list) {
-		return A3(
-			_elm_community$list_extra$List_Extra$groupsOfVarying_,
-			listOflengths,
-			list,
-			{ctor: '[]'});
-	});
-var _elm_community$list_extra$List_Extra$unfoldr = F2(
-	function (f, seed) {
-		var _p23 = f(seed);
-		if (_p23.ctor === 'Nothing') {
-			return {ctor: '[]'};
-		} else {
-			return {
-				ctor: '::',
-				_0: _p23._0._0,
-				_1: A2(_elm_community$list_extra$List_Extra$unfoldr, f, _p23._0._1)
-			};
-		}
-	});
-var _elm_community$list_extra$List_Extra$scanr1 = F2(
-	function (f, xs_) {
-		var _p24 = xs_;
-		if (_p24.ctor === '[]') {
-			return {ctor: '[]'};
-		} else {
-			if (_p24._1.ctor === '[]') {
-				return {
-					ctor: '::',
-					_0: _p24._0,
-					_1: {ctor: '[]'}
-				};
-			} else {
-				var _p25 = A2(_elm_community$list_extra$List_Extra$scanr1, f, _p24._1);
-				if (_p25.ctor === '::') {
-					return {
-						ctor: '::',
-						_0: A2(f, _p24._0, _p25._0),
-						_1: _p25
-					};
-				} else {
-					return {ctor: '[]'};
-				}
-			}
-		}
-	});
-var _elm_community$list_extra$List_Extra$scanr = F3(
-	function (f, acc, xs_) {
-		var _p26 = xs_;
-		if (_p26.ctor === '[]') {
-			return {
-				ctor: '::',
-				_0: acc,
-				_1: {ctor: '[]'}
-			};
-		} else {
-			var _p27 = A3(_elm_community$list_extra$List_Extra$scanr, f, acc, _p26._1);
-			if (_p27.ctor === '::') {
-				return {
-					ctor: '::',
-					_0: A2(f, _p26._0, _p27._0),
-					_1: _p27
-				};
-			} else {
-				return {ctor: '[]'};
-			}
-		}
-	});
-var _elm_community$list_extra$List_Extra$scanl1 = F2(
-	function (f, xs_) {
-		var _p28 = xs_;
-		if (_p28.ctor === '[]') {
-			return {ctor: '[]'};
-		} else {
-			return A3(_elm_lang$core$List$scanl, f, _p28._0, _p28._1);
-		}
-	});
-var _elm_community$list_extra$List_Extra$indexedFoldr = F3(
-	function (func, acc, list) {
-		var step = F2(
-			function (x, _p29) {
-				var _p30 = _p29;
-				var _p31 = _p30._0;
-				return {
-					ctor: '_Tuple2',
-					_0: _p31 - 1,
-					_1: A3(func, _p31, x, _p30._1)
-				};
-			});
-		return _elm_lang$core$Tuple$second(
-			A3(
-				_elm_lang$core$List$foldr,
-				step,
-				{
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$List$length(list) - 1,
-					_1: acc
-				},
-				list));
-	});
-var _elm_community$list_extra$List_Extra$indexedFoldl = F3(
-	function (func, acc, list) {
-		var step = F2(
-			function (x, _p32) {
-				var _p33 = _p32;
-				var _p34 = _p33._0;
-				return {
-					ctor: '_Tuple2',
-					_0: _p34 + 1,
-					_1: A3(func, _p34, x, _p33._1)
-				};
-			});
-		return _elm_lang$core$Tuple$second(
-			A3(
-				_elm_lang$core$List$foldl,
-				step,
-				{ctor: '_Tuple2', _0: 0, _1: acc},
-				list));
-	});
-var _elm_community$list_extra$List_Extra$foldr1 = F2(
-	function (f, xs) {
-		var mf = F2(
-			function (x, m) {
-				return _elm_lang$core$Maybe$Just(
-					function () {
-						var _p35 = m;
-						if (_p35.ctor === 'Nothing') {
-							return x;
-						} else {
-							return A2(f, x, _p35._0);
-						}
-					}());
-			});
-		return A3(_elm_lang$core$List$foldr, mf, _elm_lang$core$Maybe$Nothing, xs);
-	});
-var _elm_community$list_extra$List_Extra$foldl1 = F2(
-	function (f, xs) {
-		var mf = F2(
-			function (x, m) {
-				return _elm_lang$core$Maybe$Just(
-					function () {
-						var _p36 = m;
-						if (_p36.ctor === 'Nothing') {
-							return x;
-						} else {
-							return A2(f, _p36._0, x);
-						}
-					}());
-			});
-		return A3(_elm_lang$core$List$foldl, mf, _elm_lang$core$Maybe$Nothing, xs);
-	});
-var _elm_community$list_extra$List_Extra$interweaveHelp = F3(
-	function (l1, l2, acc) {
-		interweaveHelp:
-		while (true) {
-			var _p37 = {ctor: '_Tuple2', _0: l1, _1: l2};
-			_v24_1:
-			do {
-				if (_p37._0.ctor === '::') {
-					if (_p37._1.ctor === '::') {
-						var _v25 = _p37._0._1,
-							_v26 = _p37._1._1,
-							_v27 = A2(
-							_elm_lang$core$Basics_ops['++'],
-							acc,
-							{
-								ctor: '::',
-								_0: _p37._0._0,
-								_1: {
-									ctor: '::',
-									_0: _p37._1._0,
-									_1: {ctor: '[]'}
-								}
-							});
-						l1 = _v25;
-						l2 = _v26;
-						acc = _v27;
-						continue interweaveHelp;
-					} else {
-						break _v24_1;
-					}
-				} else {
-					if (_p37._1.ctor === '[]') {
-						break _v24_1;
-					} else {
-						return A2(_elm_lang$core$Basics_ops['++'], acc, _p37._1);
-					}
-				}
-			} while(false);
-			return A2(_elm_lang$core$Basics_ops['++'], acc, _p37._0);
-		}
-	});
-var _elm_community$list_extra$List_Extra$interweave = F2(
-	function (l1, l2) {
-		return A3(
-			_elm_community$list_extra$List_Extra$interweaveHelp,
-			l1,
-			l2,
-			{ctor: '[]'});
-	});
-var _elm_community$list_extra$List_Extra$permutations = function (xs_) {
-	var _p38 = xs_;
-	if (_p38.ctor === '[]') {
-		return {
-			ctor: '::',
-			_0: {ctor: '[]'},
-			_1: {ctor: '[]'}
-		};
-	} else {
-		var f = function (_p39) {
-			var _p40 = _p39;
-			return A2(
-				_elm_lang$core$List$map,
-				F2(
-					function (x, y) {
-						return {ctor: '::', _0: x, _1: y};
-					})(_p40._0),
-				_elm_community$list_extra$List_Extra$permutations(_p40._1));
-		};
-		return A2(
-			_elm_lang$core$List$concatMap,
-			f,
-			_elm_community$list_extra$List_Extra$select(_p38));
-	}
-};
-var _elm_community$list_extra$List_Extra$isPermutationOf = F2(
-	function (permut, xs) {
-		return A2(
-			_elm_lang$core$List$member,
-			permut,
-			_elm_community$list_extra$List_Extra$permutations(xs));
-	});
-var _elm_community$list_extra$List_Extra$subsequencesNonEmpty = function (xs) {
-	var _p41 = xs;
-	if (_p41.ctor === '[]') {
-		return {ctor: '[]'};
-	} else {
-		var _p42 = _p41._0;
-		var f = F2(
-			function (ys, r) {
-				return {
-					ctor: '::',
-					_0: ys,
-					_1: {
-						ctor: '::',
-						_0: {ctor: '::', _0: _p42, _1: ys},
-						_1: r
-					}
-				};
-			});
-		return {
-			ctor: '::',
-			_0: {
-				ctor: '::',
-				_0: _p42,
-				_1: {ctor: '[]'}
-			},
-			_1: A3(
-				_elm_lang$core$List$foldr,
-				f,
-				{ctor: '[]'},
-				_elm_community$list_extra$List_Extra$subsequencesNonEmpty(_p41._1))
-		};
-	}
-};
-var _elm_community$list_extra$List_Extra$subsequences = function (xs) {
-	return {
-		ctor: '::',
-		_0: {ctor: '[]'},
-		_1: _elm_community$list_extra$List_Extra$subsequencesNonEmpty(xs)
-	};
-};
-var _elm_community$list_extra$List_Extra$isSubsequenceOf = F2(
-	function (subseq, xs) {
-		return A2(
-			_elm_lang$core$List$member,
-			subseq,
-			_elm_community$list_extra$List_Extra$subsequences(xs));
-	});
-var _elm_community$list_extra$List_Extra$transpose = function (ll) {
-	transpose:
-	while (true) {
-		var _p43 = ll;
-		if (_p43.ctor === '[]') {
-			return {ctor: '[]'};
-		} else {
-			if (_p43._0.ctor === '[]') {
-				var _v32 = _p43._1;
-				ll = _v32;
-				continue transpose;
-			} else {
-				var _p44 = _p43._1;
-				var tails = A2(_elm_lang$core$List$filterMap, _elm_lang$core$List$tail, _p44);
-				var heads = A2(_elm_lang$core$List$filterMap, _elm_lang$core$List$head, _p44);
-				return {
-					ctor: '::',
-					_0: {ctor: '::', _0: _p43._0._0, _1: heads},
-					_1: _elm_community$list_extra$List_Extra$transpose(
-						{ctor: '::', _0: _p43._0._1, _1: tails})
-				};
-			}
-		}
-	}
-};
-var _elm_community$list_extra$List_Extra$intercalate = function (xs) {
-	return function (_p45) {
-		return _elm_lang$core$List$concat(
-			A2(_elm_lang$core$List$intersperse, xs, _p45));
-	};
-};
-var _elm_community$list_extra$List_Extra$filterNot = F2(
-	function (pred, list) {
-		return A2(
-			_elm_lang$core$List$filter,
-			function (_p46) {
-				return !pred(_p46);
-			},
-			list);
-	});
-var _elm_community$list_extra$List_Extra$removeAt = F2(
-	function (index, l) {
-		if (_elm_lang$core$Native_Utils.cmp(index, 0) < 0) {
-			return l;
-		} else {
-			var tail = _elm_lang$core$List$tail(
-				A2(_elm_lang$core$List$drop, index, l));
-			var head = A2(_elm_lang$core$List$take, index, l);
-			var _p47 = tail;
-			if (_p47.ctor === 'Nothing') {
-				return l;
-			} else {
-				return A2(_elm_lang$core$List$append, head, _p47._0);
-			}
-		}
-	});
-var _elm_community$list_extra$List_Extra$stableSortWith = F2(
-	function (pred, list) {
-		var predWithIndex = F2(
-			function (_p49, _p48) {
-				var _p50 = _p49;
-				var _p51 = _p48;
-				var result = A2(pred, _p50._0, _p51._0);
-				var _p52 = result;
-				if (_p52.ctor === 'EQ') {
-					return A2(_elm_lang$core$Basics$compare, _p50._1, _p51._1);
-				} else {
-					return result;
-				}
-			});
-		var listWithIndex = A2(
-			_elm_lang$core$List$indexedMap,
-			F2(
-				function (i, a) {
-					return {ctor: '_Tuple2', _0: a, _1: i};
-				}),
-			list);
-		return A2(
-			_elm_lang$core$List$map,
-			_elm_lang$core$Tuple$first,
-			A2(_elm_lang$core$List$sortWith, predWithIndex, listWithIndex));
-	});
-var _elm_community$list_extra$List_Extra$setAt = F3(
-	function (index, value, l) {
-		if (_elm_lang$core$Native_Utils.cmp(index, 0) < 0) {
-			return _elm_lang$core$Maybe$Nothing;
-		} else {
-			var tail = _elm_lang$core$List$tail(
-				A2(_elm_lang$core$List$drop, index, l));
-			var head = A2(_elm_lang$core$List$take, index, l);
-			var _p53 = tail;
-			if (_p53.ctor === 'Nothing') {
-				return _elm_lang$core$Maybe$Nothing;
-			} else {
-				return _elm_lang$core$Maybe$Just(
-					A2(
-						_elm_lang$core$List$append,
-						head,
-						{ctor: '::', _0: value, _1: _p53._0}));
-			}
-		}
-	});
-var _elm_community$list_extra$List_Extra$remove = F2(
-	function (x, xs) {
-		var _p54 = xs;
-		if (_p54.ctor === '[]') {
-			return {ctor: '[]'};
-		} else {
-			var _p56 = _p54._1;
-			var _p55 = _p54._0;
-			return _elm_lang$core$Native_Utils.eq(x, _p55) ? _p56 : {
-				ctor: '::',
-				_0: _p55,
-				_1: A2(_elm_community$list_extra$List_Extra$remove, x, _p56)
-			};
-		}
-	});
-var _elm_community$list_extra$List_Extra$updateIfIndex = F3(
-	function (predicate, update, list) {
-		return A2(
-			_elm_lang$core$List$indexedMap,
-			F2(
-				function (i, x) {
-					return predicate(i) ? update(x) : x;
-				}),
-			list);
-	});
-var _elm_community$list_extra$List_Extra$updateAt = F3(
-	function (index, update, list) {
-		return ((_elm_lang$core$Native_Utils.cmp(index, 0) < 0) || (_elm_lang$core$Native_Utils.cmp(
-			index,
-			_elm_lang$core$List$length(list)) > -1)) ? _elm_lang$core$Maybe$Nothing : _elm_lang$core$Maybe$Just(
-			A3(
-				_elm_community$list_extra$List_Extra$updateIfIndex,
-				F2(
-					function (x, y) {
-						return _elm_lang$core$Native_Utils.eq(x, y);
-					})(index),
-				update,
-				list));
-	});
-var _elm_community$list_extra$List_Extra$updateIf = F3(
-	function (predicate, update, list) {
-		return A2(
-			_elm_lang$core$List$map,
-			function (item) {
-				return predicate(item) ? update(item) : item;
-			},
-			list);
-	});
-var _elm_community$list_extra$List_Extra$replaceIf = F3(
-	function (predicate, replacement, list) {
-		return A3(
-			_elm_community$list_extra$List_Extra$updateIf,
-			predicate,
-			_elm_lang$core$Basics$always(replacement),
-			list);
-	});
-var _elm_community$list_extra$List_Extra$findIndices = function (p) {
-	return function (_p57) {
-		return A2(
-			_elm_lang$core$List$map,
-			_elm_lang$core$Tuple$first,
-			A2(
-				_elm_lang$core$List$filter,
-				function (_p58) {
-					var _p59 = _p58;
-					return p(_p59._1);
-				},
-				A2(
-					_elm_lang$core$List$indexedMap,
-					F2(
-						function (v0, v1) {
-							return {ctor: '_Tuple2', _0: v0, _1: v1};
-						}),
-					_p57)));
-	};
-};
-var _elm_community$list_extra$List_Extra$findIndex = function (p) {
-	return function (_p60) {
-		return _elm_lang$core$List$head(
-			A2(_elm_community$list_extra$List_Extra$findIndices, p, _p60));
-	};
-};
-var _elm_community$list_extra$List_Extra$elemIndices = function (x) {
-	return _elm_community$list_extra$List_Extra$findIndices(
-		F2(
-			function (x, y) {
-				return _elm_lang$core$Native_Utils.eq(x, y);
-			})(x));
-};
-var _elm_community$list_extra$List_Extra$elemIndex = function (x) {
-	return _elm_community$list_extra$List_Extra$findIndex(
-		F2(
-			function (x, y) {
-				return _elm_lang$core$Native_Utils.eq(x, y);
-			})(x));
-};
-var _elm_community$list_extra$List_Extra$find = F2(
-	function (predicate, list) {
-		find:
-		while (true) {
-			var _p61 = list;
-			if (_p61.ctor === '[]') {
-				return _elm_lang$core$Maybe$Nothing;
-			} else {
-				var _p62 = _p61._0;
-				if (predicate(_p62)) {
-					return _elm_lang$core$Maybe$Just(_p62);
-				} else {
-					var _v41 = predicate,
-						_v42 = _p61._1;
-					predicate = _v41;
-					list = _v42;
-					continue find;
-				}
-			}
-		}
-	});
-var _elm_community$list_extra$List_Extra$notMember = function (x) {
-	return function (_p63) {
-		return !A2(_elm_lang$core$List$member, x, _p63);
-	};
-};
-var _elm_community$list_extra$List_Extra$andThen = _elm_lang$core$List$concatMap;
-var _elm_community$list_extra$List_Extra$lift2 = F3(
-	function (f, la, lb) {
-		return A2(
-			_elm_community$list_extra$List_Extra$andThen,
-			function (a) {
-				return A2(
-					_elm_community$list_extra$List_Extra$andThen,
-					function (b) {
-						return {
-							ctor: '::',
-							_0: A2(f, a, b),
-							_1: {ctor: '[]'}
-						};
-					},
-					lb);
-			},
-			la);
-	});
-var _elm_community$list_extra$List_Extra$lift3 = F4(
-	function (f, la, lb, lc) {
-		return A2(
-			_elm_community$list_extra$List_Extra$andThen,
-			function (a) {
-				return A2(
-					_elm_community$list_extra$List_Extra$andThen,
-					function (b) {
-						return A2(
-							_elm_community$list_extra$List_Extra$andThen,
-							function (c) {
-								return {
-									ctor: '::',
-									_0: A3(f, a, b, c),
-									_1: {ctor: '[]'}
-								};
-							},
-							lc);
-					},
-					lb);
-			},
-			la);
-	});
-var _elm_community$list_extra$List_Extra$lift4 = F5(
-	function (f, la, lb, lc, ld) {
-		return A2(
-			_elm_community$list_extra$List_Extra$andThen,
-			function (a) {
-				return A2(
-					_elm_community$list_extra$List_Extra$andThen,
-					function (b) {
-						return A2(
-							_elm_community$list_extra$List_Extra$andThen,
-							function (c) {
-								return A2(
-									_elm_community$list_extra$List_Extra$andThen,
-									function (d) {
-										return {
-											ctor: '::',
-											_0: A4(f, a, b, c, d),
-											_1: {ctor: '[]'}
-										};
-									},
-									ld);
-							},
-							lc);
-					},
-					lb);
-			},
-			la);
-	});
-var _elm_community$list_extra$List_Extra$andMap = F2(
-	function (l, fl) {
-		return A3(
-			_elm_lang$core$List$map2,
-			F2(
-				function (x, y) {
-					return x(y);
-				}),
-			fl,
-			l);
-	});
-var _elm_community$list_extra$List_Extra$uniqueHelp = F3(
-	function (f, existing, remaining) {
-		uniqueHelp:
-		while (true) {
-			var _p64 = remaining;
-			if (_p64.ctor === '[]') {
-				return {ctor: '[]'};
-			} else {
-				var _p66 = _p64._1;
-				var _p65 = _p64._0;
-				var computedFirst = f(_p65);
-				if (A2(_elm_lang$core$Set$member, computedFirst, existing)) {
-					var _v44 = f,
-						_v45 = existing,
-						_v46 = _p66;
-					f = _v44;
-					existing = _v45;
-					remaining = _v46;
-					continue uniqueHelp;
-				} else {
-					return {
-						ctor: '::',
-						_0: _p65,
-						_1: A3(
-							_elm_community$list_extra$List_Extra$uniqueHelp,
-							f,
-							A2(_elm_lang$core$Set$insert, computedFirst, existing),
-							_p66)
-					};
-				}
-			}
-		}
-	});
-var _elm_community$list_extra$List_Extra$uniqueBy = F2(
-	function (f, list) {
-		return A3(_elm_community$list_extra$List_Extra$uniqueHelp, f, _elm_lang$core$Set$empty, list);
-	});
-var _elm_community$list_extra$List_Extra$allDifferentBy = F2(
-	function (f, list) {
-		return _elm_lang$core$Native_Utils.eq(
-			_elm_lang$core$List$length(list),
-			_elm_lang$core$List$length(
-				A2(_elm_community$list_extra$List_Extra$uniqueBy, f, list)));
-	});
-var _elm_community$list_extra$List_Extra$allDifferent = function (list) {
-	return A2(_elm_community$list_extra$List_Extra$allDifferentBy, _elm_lang$core$Basics$identity, list);
-};
-var _elm_community$list_extra$List_Extra$unique = function (list) {
-	return A3(_elm_community$list_extra$List_Extra$uniqueHelp, _elm_lang$core$Basics$identity, _elm_lang$core$Set$empty, list);
-};
-var _elm_community$list_extra$List_Extra$dropWhile = F2(
-	function (predicate, list) {
-		dropWhile:
-		while (true) {
-			var _p67 = list;
-			if (_p67.ctor === '[]') {
-				return {ctor: '[]'};
-			} else {
-				if (predicate(_p67._0)) {
-					var _v48 = predicate,
-						_v49 = _p67._1;
-					predicate = _v48;
-					list = _v49;
-					continue dropWhile;
-				} else {
-					return list;
-				}
-			}
-		}
-	});
-var _elm_community$list_extra$List_Extra$takeWhile = function (predicate) {
-	var takeWhileMemo = F2(
-		function (memo, list) {
-			takeWhileMemo:
-			while (true) {
-				var _p68 = list;
-				if (_p68.ctor === '[]') {
-					return _elm_lang$core$List$reverse(memo);
-				} else {
-					var _p69 = _p68._0;
-					if (predicate(_p69)) {
-						var _v51 = {ctor: '::', _0: _p69, _1: memo},
-							_v52 = _p68._1;
-						memo = _v51;
-						list = _v52;
-						continue takeWhileMemo;
-					} else {
-						return _elm_lang$core$List$reverse(memo);
-					}
-				}
-			}
-		});
-	return takeWhileMemo(
-		{ctor: '[]'});
-};
-var _elm_community$list_extra$List_Extra$span = F2(
-	function (p, xs) {
-		return {
-			ctor: '_Tuple2',
-			_0: A2(_elm_community$list_extra$List_Extra$takeWhile, p, xs),
-			_1: A2(_elm_community$list_extra$List_Extra$dropWhile, p, xs)
-		};
-	});
-var _elm_community$list_extra$List_Extra$break = function (p) {
-	return _elm_community$list_extra$List_Extra$span(
-		function (_p70) {
-			return !p(_p70);
-		});
-};
-var _elm_community$list_extra$List_Extra$groupWhile = F2(
-	function (eq, xs_) {
-		var _p71 = xs_;
-		if (_p71.ctor === '[]') {
-			return {ctor: '[]'};
-		} else {
-			var _p73 = _p71._0;
-			var _p72 = A2(
-				_elm_community$list_extra$List_Extra$span,
-				eq(_p73),
-				_p71._1);
-			var ys = _p72._0;
-			var zs = _p72._1;
-			return {
-				ctor: '::',
-				_0: {ctor: '::', _0: _p73, _1: ys},
-				_1: A2(_elm_community$list_extra$List_Extra$groupWhile, eq, zs)
-			};
-		}
-	});
-var _elm_community$list_extra$List_Extra$group = _elm_community$list_extra$List_Extra$groupWhile(
-	F2(
-		function (x, y) {
-			return _elm_lang$core$Native_Utils.eq(x, y);
-		}));
-var _elm_community$list_extra$List_Extra$minimumBy = F2(
-	function (f, ls) {
-		var minBy = F2(
-			function (x, _p74) {
-				var _p75 = _p74;
-				var _p76 = _p75._1;
-				var fx = f(x);
-				return (_elm_lang$core$Native_Utils.cmp(fx, _p76) < 0) ? {ctor: '_Tuple2', _0: x, _1: fx} : {ctor: '_Tuple2', _0: _p75._0, _1: _p76};
-			});
-		var _p77 = ls;
-		if (_p77.ctor === '::') {
-			if (_p77._1.ctor === '[]') {
-				return _elm_lang$core$Maybe$Just(_p77._0);
-			} else {
-				var _p78 = _p77._0;
-				return _elm_lang$core$Maybe$Just(
-					_elm_lang$core$Tuple$first(
-						A3(
-							_elm_lang$core$List$foldl,
-							minBy,
-							{
-								ctor: '_Tuple2',
-								_0: _p78,
-								_1: f(_p78)
-							},
-							_p77._1)));
-			}
-		} else {
-			return _elm_lang$core$Maybe$Nothing;
-		}
-	});
-var _elm_community$list_extra$List_Extra$maximumBy = F2(
-	function (f, ls) {
-		var maxBy = F2(
-			function (x, _p79) {
-				var _p80 = _p79;
-				var _p81 = _p80._1;
-				var fx = f(x);
-				return (_elm_lang$core$Native_Utils.cmp(fx, _p81) > 0) ? {ctor: '_Tuple2', _0: x, _1: fx} : {ctor: '_Tuple2', _0: _p80._0, _1: _p81};
-			});
-		var _p82 = ls;
-		if (_p82.ctor === '::') {
-			if (_p82._1.ctor === '[]') {
-				return _elm_lang$core$Maybe$Just(_p82._0);
-			} else {
-				var _p83 = _p82._0;
-				return _elm_lang$core$Maybe$Just(
-					_elm_lang$core$Tuple$first(
-						A3(
-							_elm_lang$core$List$foldl,
-							maxBy,
-							{
-								ctor: '_Tuple2',
-								_0: _p83,
-								_1: f(_p83)
-							},
-							_p82._1)));
-			}
-		} else {
-			return _elm_lang$core$Maybe$Nothing;
-		}
-	});
-var _elm_community$list_extra$List_Extra$uncons = function (xs) {
-	var _p84 = xs;
-	if (_p84.ctor === '[]') {
-		return _elm_lang$core$Maybe$Nothing;
-	} else {
-		return _elm_lang$core$Maybe$Just(
-			{ctor: '_Tuple2', _0: _p84._0, _1: _p84._1});
-	}
-};
-var _elm_community$list_extra$List_Extra$swapAt = F3(
-	function (index1, index2, l) {
-		swapAt:
-		while (true) {
-			if (_elm_lang$core$Native_Utils.eq(index1, index2)) {
-				return _elm_lang$core$Maybe$Just(l);
-			} else {
-				if (_elm_lang$core$Native_Utils.cmp(index1, index2) > 0) {
-					var _v59 = index2,
-						_v60 = index1,
-						_v61 = l;
-					index1 = _v59;
-					index2 = _v60;
-					l = _v61;
-					continue swapAt;
-				} else {
-					if (_elm_lang$core$Native_Utils.cmp(index1, 0) < 0) {
-						return _elm_lang$core$Maybe$Nothing;
-					} else {
-						var _p85 = A2(_elm_community$list_extra$List_Extra$splitAt, index1, l);
-						var part1 = _p85._0;
-						var tail1 = _p85._1;
-						var _p86 = A2(_elm_community$list_extra$List_Extra$splitAt, index2 - index1, tail1);
-						var head2 = _p86._0;
-						var tail2 = _p86._1;
-						return A3(
-							_elm_lang$core$Maybe$map2,
-							F2(
-								function (_p88, _p87) {
-									var _p89 = _p88;
-									var _p90 = _p87;
-									return _elm_lang$core$List$concat(
-										{
-											ctor: '::',
-											_0: part1,
-											_1: {
-												ctor: '::',
-												_0: {ctor: '::', _0: _p90._0, _1: _p89._1},
-												_1: {
-													ctor: '::',
-													_0: {ctor: '::', _0: _p89._0, _1: _p90._1},
-													_1: {ctor: '[]'}
-												}
-											}
-										});
-								}),
-							_elm_community$list_extra$List_Extra$uncons(head2),
-							_elm_community$list_extra$List_Extra$uncons(tail2));
-					}
-				}
-			}
-		}
-	});
-var _elm_community$list_extra$List_Extra$iterate = F2(
-	function (f, x) {
-		var _p91 = f(x);
-		if (_p91.ctor === 'Just') {
-			return {
-				ctor: '::',
-				_0: x,
-				_1: A2(_elm_community$list_extra$List_Extra$iterate, f, _p91._0)
-			};
-		} else {
-			return {
-				ctor: '::',
-				_0: x,
-				_1: {ctor: '[]'}
-			};
-		}
-	});
-var _elm_community$list_extra$List_Extra$getAt = F2(
-	function (idx, xs) {
-		return (_elm_lang$core$Native_Utils.cmp(idx, 0) < 0) ? _elm_lang$core$Maybe$Nothing : _elm_lang$core$List$head(
-			A2(_elm_lang$core$List$drop, idx, xs));
-	});
-var _elm_community$list_extra$List_Extra_ops = _elm_community$list_extra$List_Extra_ops || {};
-_elm_community$list_extra$List_Extra_ops['!!'] = _elm_lang$core$Basics$flip(_elm_community$list_extra$List_Extra$getAt);
-var _elm_community$list_extra$List_Extra$init = function () {
-	var maybe = F2(
-		function (d, f) {
-			return function (_p92) {
-				return A2(
-					_elm_lang$core$Maybe$withDefault,
-					d,
-					A2(_elm_lang$core$Maybe$map, f, _p92));
-			};
-		});
-	return A2(
-		_elm_lang$core$List$foldr,
-		function (x) {
-			return function (_p93) {
-				return _elm_lang$core$Maybe$Just(
-					A3(
-						maybe,
-						{ctor: '[]'},
-						F2(
-							function (x, y) {
-								return {ctor: '::', _0: x, _1: y};
-							})(x),
-						_p93));
-			};
-		},
-		_elm_lang$core$Maybe$Nothing);
-}();
-var _elm_community$list_extra$List_Extra$last = _elm_community$list_extra$List_Extra$foldl1(
-	_elm_lang$core$Basics$flip(_elm_lang$core$Basics$always));
-
 var _elm_lang$core$Task$onError = _elm_lang$core$Native_Scheduler.onError;
 var _elm_lang$core$Task$andThen = _elm_lang$core$Native_Scheduler.andThen;
 var _elm_lang$core$Task$spawnCmd = F2(
@@ -11303,6 +9789,188 @@ var _elm_lang$websocket$WebSocket$onSelfMsg = F3(
 	});
 _elm_lang$core$Native_Platform.effectManagers['WebSocket'] = {pkg: 'elm-lang/websocket', init: _elm_lang$websocket$WebSocket$init, onEffects: _elm_lang$websocket$WebSocket$onEffects, onSelfMsg: _elm_lang$websocket$WebSocket$onSelfMsg, tag: 'fx', cmdMap: _elm_lang$websocket$WebSocket$cmdMap, subMap: _elm_lang$websocket$WebSocket$subMap};
 
+var _husio$scrumboard$Extra$onKeyPressed = F2(
+	function (key, cmd) {
+		var isKey = function (code) {
+			return _elm_lang$core$Native_Utils.eq(code, key) ? _elm_lang$core$Json_Decode$succeed(cmd) : _elm_lang$core$Json_Decode$fail('');
+		};
+		return A2(
+			_elm_lang$html$Html_Events$on,
+			'keydown',
+			A2(_elm_lang$core$Json_Decode$andThen, isKey, _elm_lang$html$Html_Events$keyCode));
+	});
+var _husio$scrumboard$Extra$onEsc = function (msg) {
+	return A2(_husio$scrumboard$Extra$onKeyPressed, 27, msg);
+};
+var _husio$scrumboard$Extra$onEnter = function (msg) {
+	return A2(_husio$scrumboard$Extra$onKeyPressed, 13, msg);
+};
+
+var _husio$scrumboard$GitHub$Repository = F4(
+	function (a, b, c, d) {
+		return {name: a, fullName: b, $private: c, owner: d};
+	});
+var _husio$scrumboard$GitHub$Issue = F9(
+	function (a, b, c, d, e, f, g, h, i) {
+		return {id: a, htmlUrl: b, title: c, state: d, comments: e, body: f, labels: g, url: h, assignees: i};
+	});
+var _husio$scrumboard$GitHub$User = F3(
+	function (a, b, c) {
+		return {id: a, login: b, avatarUrl: c};
+	});
+var _husio$scrumboard$GitHub$decodeUser = A4(
+	_elm_lang$core$Json_Decode$map3,
+	_husio$scrumboard$GitHub$User,
+	A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$int),
+	A2(_elm_lang$core$Json_Decode$field, 'login', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'avatar_url', _elm_lang$core$Json_Decode$string));
+var _husio$scrumboard$GitHub$decodeRespository = A5(
+	_elm_lang$core$Json_Decode$map4,
+	_husio$scrumboard$GitHub$Repository,
+	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'full_name', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'private', _elm_lang$core$Json_Decode$bool),
+	A2(_elm_lang$core$Json_Decode$field, 'owner', _husio$scrumboard$GitHub$decodeUser));
+var _husio$scrumboard$GitHub$fetchUserRepos = F2(
+	function (githubAccessKey, msg) {
+		var url = A2(_elm_lang$core$Basics_ops['++'], 'https://api.github.com/user/repos?access_token=', githubAccessKey);
+		return A2(
+			_elm_lang$http$Http$send,
+			msg,
+			A2(
+				_elm_lang$http$Http$get,
+				url,
+				_elm_lang$core$Json_Decode$list(_husio$scrumboard$GitHub$decodeRespository)));
+	});
+var _husio$scrumboard$GitHub$IssueLabel = F3(
+	function (a, b, c) {
+		return {name: a, color: b, url: c};
+	});
+var _husio$scrumboard$GitHub$decodeIssueLabel = A4(
+	_elm_lang$core$Json_Decode$map3,
+	_husio$scrumboard$GitHub$IssueLabel,
+	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'color', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'url', _elm_lang$core$Json_Decode$string));
+var _husio$scrumboard$GitHub$decodeIssue = A3(
+	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+	'assignees',
+	_elm_lang$core$Json_Decode$list(_husio$scrumboard$GitHub$decodeUser),
+	A3(
+		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+		'url',
+		_elm_lang$core$Json_Decode$string,
+		A3(
+			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+			'labels',
+			_elm_lang$core$Json_Decode$list(_husio$scrumboard$GitHub$decodeIssueLabel),
+			A4(
+				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$optional,
+				'body',
+				_elm_lang$core$Json_Decode$string,
+				'',
+				A3(
+					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+					'comments',
+					_elm_lang$core$Json_Decode$int,
+					A3(
+						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+						'state',
+						_elm_lang$core$Json_Decode$string,
+						A3(
+							_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+							'title',
+							_elm_lang$core$Json_Decode$string,
+							A3(
+								_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+								'html_url',
+								_elm_lang$core$Json_Decode$string,
+								A3(
+									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
+									'id',
+									_elm_lang$core$Json_Decode$int,
+									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_husio$scrumboard$GitHub$Issue))))))))));
+var _husio$scrumboard$GitHub$fetchIssue = F5(
+	function (accessToken, organization, repo, issueId, msg) {
+		var url = A2(
+			_elm_lang$core$Basics_ops['++'],
+			'https://api.github.com/repos/',
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				organization,
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					'/',
+					A2(
+						_elm_lang$core$Basics_ops['++'],
+						repo,
+						A2(
+							_elm_lang$core$Basics_ops['++'],
+							'/issues/',
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								_elm_lang$core$Basics$toString(issueId),
+								A2(_elm_lang$core$Basics_ops['++'], '?access_token=', accessToken)))))));
+		return A2(
+			_elm_lang$http$Http$send,
+			msg,
+			A2(_elm_lang$http$Http$get, url, _husio$scrumboard$GitHub$decodeIssue));
+	});
+var _husio$scrumboard$GitHub$fetchIssueUrl = F3(
+	function (token, cardUrl, msg) {
+		var url = A2(
+			_elm_lang$core$Basics_ops['++'],
+			cardUrl,
+			A2(_elm_lang$core$Basics_ops['++'], '?access_token=', token));
+		return A2(
+			_elm_lang$http$Http$send,
+			msg,
+			A2(_elm_lang$http$Http$get, url, _husio$scrumboard$GitHub$decodeIssue));
+	});
+var _husio$scrumboard$GitHub$fetchIssues = F2(
+	function (accessToken, msg) {
+		var url = A2(_elm_lang$core$Basics_ops['++'], 'https://api.github.com/user/issues?filter=all&state=all&sort=created&per_page=500&access_token=', accessToken);
+		return A2(
+			_elm_lang$http$Http$send,
+			msg,
+			A2(
+				_elm_lang$http$Http$get,
+				url,
+				_elm_lang$core$Json_Decode$list(_husio$scrumboard$GitHub$decodeIssue)));
+	});
+var _husio$scrumboard$GitHub$decodeSearch = A2(
+	_elm_lang$core$Json_Decode$at,
+	{
+		ctor: '::',
+		_0: 'items',
+		_1: {ctor: '[]'}
+	},
+	_elm_lang$core$Json_Decode$list(_husio$scrumboard$GitHub$decodeIssue));
+var _husio$scrumboard$GitHub$searchIssues = F3(
+	function (accessToken, query, msg) {
+		var replaceWhitespace = function ($with) {
+			return A3(
+				_elm_lang$core$Regex$replace,
+				_elm_lang$core$Regex$All,
+				_elm_lang$core$Regex$regex('\\S+'),
+				function (_p0) {
+					return $with;
+				});
+		};
+		var q = A2(replaceWhitespace, query, '+');
+		var url = A2(
+			_elm_lang$core$Basics_ops['++'],
+			'https://api.github.com/search/issues?q=',
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				q,
+				A2(_elm_lang$core$Basics_ops['++'], '&access_token=', accessToken)));
+		return A2(
+			_elm_lang$http$Http$send,
+			msg,
+			A2(_elm_lang$http$Http$get, url, _husio$scrumboard$GitHub$decodeSearch));
+	});
+
 var _norpan$elm_html5_drag_drop$Html5_DragDrop$getDropId = function (model) {
 	var _p0 = model;
 	switch (_p0.ctor) {
@@ -11492,232 +10160,7 @@ var _norpan$elm_html5_drag_drop$Html5_DragDrop$draggable = F2(
 		};
 	});
 
-var _user$project$Extra$onKeyPressed = F2(
-	function (key, cmd) {
-		var isKey = function (code) {
-			return _elm_lang$core$Native_Utils.eq(code, key) ? _elm_lang$core$Json_Decode$succeed(cmd) : _elm_lang$core$Json_Decode$fail('');
-		};
-		return A2(
-			_elm_lang$html$Html_Events$on,
-			'keydown',
-			A2(_elm_lang$core$Json_Decode$andThen, isKey, _elm_lang$html$Html_Events$keyCode));
-	});
-var _user$project$Extra$onEsc = function (msg) {
-	return A2(_user$project$Extra$onKeyPressed, 27, msg);
-};
-var _user$project$Extra$onEnter = function (msg) {
-	return A2(_user$project$Extra$onKeyPressed, 13, msg);
-};
-
-var _user$project$GitHub$Repository = F4(
-	function (a, b, c, d) {
-		return {name: a, fullName: b, $private: c, owner: d};
-	});
-var _user$project$GitHub$Issue = F9(
-	function (a, b, c, d, e, f, g, h, i) {
-		return {id: a, htmlUrl: b, title: c, state: d, comments: e, body: f, labels: g, url: h, assignees: i};
-	});
-var _user$project$GitHub$User = F3(
-	function (a, b, c) {
-		return {id: a, login: b, avatarUrl: c};
-	});
-var _user$project$GitHub$decodeUser = A4(
-	_elm_lang$core$Json_Decode$map3,
-	_user$project$GitHub$User,
-	A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$int),
-	A2(_elm_lang$core$Json_Decode$field, 'login', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'avatar_url', _elm_lang$core$Json_Decode$string));
-var _user$project$GitHub$decodeRespository = A5(
-	_elm_lang$core$Json_Decode$map4,
-	_user$project$GitHub$Repository,
-	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'full_name', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'private', _elm_lang$core$Json_Decode$bool),
-	A2(_elm_lang$core$Json_Decode$field, 'owner', _user$project$GitHub$decodeUser));
-var _user$project$GitHub$fetchUserRepos = F2(
-	function (githubAccessKey, msg) {
-		var url = A2(_elm_lang$core$Basics_ops['++'], 'https://api.github.com/user/repos?access_token=', githubAccessKey);
-		return A2(
-			_elm_lang$http$Http$send,
-			msg,
-			A2(
-				_elm_lang$http$Http$get,
-				url,
-				_elm_lang$core$Json_Decode$list(_user$project$GitHub$decodeRespository)));
-	});
-var _user$project$GitHub$IssueLabel = F3(
-	function (a, b, c) {
-		return {name: a, color: b, url: c};
-	});
-var _user$project$GitHub$decodeIssueLabel = A4(
-	_elm_lang$core$Json_Decode$map3,
-	_user$project$GitHub$IssueLabel,
-	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'color', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'url', _elm_lang$core$Json_Decode$string));
-var _user$project$GitHub$decodeIssue = A3(
-	_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-	'assignees',
-	_elm_lang$core$Json_Decode$list(_user$project$GitHub$decodeUser),
-	A3(
-		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-		'url',
-		_elm_lang$core$Json_Decode$string,
-		A3(
-			_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-			'labels',
-			_elm_lang$core$Json_Decode$list(_user$project$GitHub$decodeIssueLabel),
-			A4(
-				_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$optional,
-				'body',
-				_elm_lang$core$Json_Decode$string,
-				'',
-				A3(
-					_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-					'comments',
-					_elm_lang$core$Json_Decode$int,
-					A3(
-						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-						'state',
-						_elm_lang$core$Json_Decode$string,
-						A3(
-							_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-							'title',
-							_elm_lang$core$Json_Decode$string,
-							A3(
-								_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-								'html_url',
-								_elm_lang$core$Json_Decode$string,
-								A3(
-									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
-									'id',
-									_elm_lang$core$Json_Decode$int,
-									_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$GitHub$Issue))))))))));
-var _user$project$GitHub$fetchIssue = F5(
-	function (accessToken, organization, repo, issueId, msg) {
-		var url = A2(
-			_elm_lang$core$Basics_ops['++'],
-			'https://api.github.com/repos/',
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				organization,
-				A2(
-					_elm_lang$core$Basics_ops['++'],
-					'/',
-					A2(
-						_elm_lang$core$Basics_ops['++'],
-						repo,
-						A2(
-							_elm_lang$core$Basics_ops['++'],
-							'/issues/',
-							A2(
-								_elm_lang$core$Basics_ops['++'],
-								_elm_lang$core$Basics$toString(issueId),
-								A2(_elm_lang$core$Basics_ops['++'], '?access_token=', accessToken)))))));
-		return A2(
-			_elm_lang$http$Http$send,
-			msg,
-			A2(_elm_lang$http$Http$get, url, _user$project$GitHub$decodeIssue));
-	});
-var _user$project$GitHub$fetchIssueUrl = F3(
-	function (token, cardUrl, msg) {
-		var url = A2(
-			_elm_lang$core$Basics_ops['++'],
-			cardUrl,
-			A2(_elm_lang$core$Basics_ops['++'], '?access_token=', token));
-		return A2(
-			_elm_lang$http$Http$send,
-			msg,
-			A2(_elm_lang$http$Http$get, url, _user$project$GitHub$decodeIssue));
-	});
-var _user$project$GitHub$fetchIssues = F2(
-	function (accessToken, msg) {
-		var url = A2(_elm_lang$core$Basics_ops['++'], 'https://api.github.com/user/issues?filter=all&state=all&sort=created&per_page=500&access_token=', accessToken);
-		return A2(
-			_elm_lang$http$Http$send,
-			msg,
-			A2(
-				_elm_lang$http$Http$get,
-				url,
-				_elm_lang$core$Json_Decode$list(_user$project$GitHub$decodeIssue)));
-	});
-var _user$project$GitHub$decodeSearch = A2(
-	_elm_lang$core$Json_Decode$at,
-	{
-		ctor: '::',
-		_0: 'items',
-		_1: {ctor: '[]'}
-	},
-	_elm_lang$core$Json_Decode$list(_user$project$GitHub$decodeIssue));
-var _user$project$GitHub$searchIssues = F3(
-	function (accessToken, query, msg) {
-		var replaceWhitespace = function ($with) {
-			return A3(
-				_elm_lang$core$Regex$replace,
-				_elm_lang$core$Regex$All,
-				_elm_lang$core$Regex$regex('\\S+'),
-				function (_p0) {
-					return $with;
-				});
-		};
-		var q = A2(replaceWhitespace, query, '+');
-		var url = A2(
-			_elm_lang$core$Basics_ops['++'],
-			'https://api.github.com/search/issues?q=',
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				q,
-				A2(_elm_lang$core$Basics_ops['++'], '&access_token=', accessToken)));
-		return A2(
-			_elm_lang$http$Http$send,
-			msg,
-			A2(_elm_lang$http$Http$get, url, _user$project$GitHub$decodeSearch));
-	});
-
-var _user$project$Main$moveCardTo = F3(
-	function (dropId, drag, cards) {
-		var updatePosition = function (c) {
-			return _elm_lang$core$Native_Utils.eq(c.issue.id, drag.id) ? _elm_lang$core$Native_Utils.update(
-				c,
-				{position: dropId.position, order: dropId.order}) : c;
-		};
-		return {
-			ctor: '_Tuple2',
-			_0: A2(_elm_lang$core$List$map, updatePosition, cards),
-			_1: _elm_lang$core$Platform_Cmd$none
-		};
-	});
-var _user$project$Main$hasCard = F2(
-	function (drag, cards) {
-		return A2(
-			_elm_lang$core$List$any,
-			function (c) {
-				return _elm_lang$core$Native_Utils.eq(c.issue.id, drag.id);
-			},
-			cards);
-	});
-var _user$project$Main$issueDragId = function (issue) {
-	return {id: issue.id, url: issue.url};
-};
-var _user$project$Main$cardDragId = function (card) {
-	return _user$project$Main$issueDragId(card.issue);
-};
-var _user$project$Main$icon = function (name) {
-	return A2(
-		_elm_lang$html$Html$i,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class(
-				A2(_elm_lang$core$Basics_ops['++'], 'fa fa-', name)),
-			_1: {
-				ctor: '::',
-				_0: A2(_elm_lang$html$Html_Attributes$attribute, 'aria-hidden', 'true'),
-				_1: {ctor: '[]'}
-			}
-		},
-		{ctor: '[]'});
-};
-var _user$project$Main$encodeCard = function (card) {
+var _husio$scrumboard$Model$encodeCard = function (card) {
 	return _elm_lang$core$Json_Encode$object(
 		{
 			ctor: '::',
@@ -11753,7 +10196,7 @@ var _user$project$Main$encodeCard = function (card) {
 			}
 		});
 };
-var _user$project$Main$encodeState = function (model) {
+var _husio$scrumboard$Model$encodeState = function (model) {
 	return _elm_lang$core$Json_Encode$object(
 		{
 			ctor: '::',
@@ -11761,7 +10204,7 @@ var _user$project$Main$encodeState = function (model) {
 				ctor: '_Tuple2',
 				_0: 'cards',
 				_1: _elm_lang$core$Json_Encode$list(
-					A2(_elm_lang$core$List$map, _user$project$Main$encodeCard, model.cards))
+					A2(_elm_lang$core$List$map, _husio$scrumboard$Model$encodeCard, model.cards))
 			},
 			_1: {
 				ctor: '::',
@@ -11774,69 +10217,527 @@ var _user$project$Main$encodeState = function (model) {
 			}
 		});
 };
-var _user$project$Main$sendStateSync = function (model) {
+var _husio$scrumboard$Model$emptyDroppable = {position: 1, order: 0};
+var _husio$scrumboard$Model$emptyDraggable = {id: 0, url: 'http:///issue-without-url'};
+var _husio$scrumboard$Model$columns = {
+	ctor: '::',
+	_0: 'Story',
+	_1: {
+		ctor: '::',
+		_0: 'To do',
+		_1: {
+			ctor: '::',
+			_0: 'In progress',
+			_1: {
+				ctor: '::',
+				_0: 'Done',
+				_1: {ctor: '[]'}
+			}
+		}
+	}
+};
+var _husio$scrumboard$Model$ProgramFlags = F2(
+	function (a, b) {
+		return {githubToken: a, websocketAddress: b};
+	});
+var _husio$scrumboard$Model$DraggableID = F2(
+	function (a, b) {
+		return {id: a, url: b};
+	});
+var _husio$scrumboard$Model$DroppableID = F2(
+	function (a, b) {
+		return {position: a, order: b};
+	});
+var _husio$scrumboard$Model$Model = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return {cards: a, dragDrop: b, rows: c, icelog: d, icelogQuery: e, showIcelog: f, error: g, flags: h, githubOrg: i, repositories: j};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
+var _husio$scrumboard$Model$Card = F3(
+	function (a, b, c) {
+		return {position: a, order: b, issue: c};
+	});
+var _husio$scrumboard$Model$State = F2(
+	function (a, b) {
+		return {rows: a, cards: b};
+	});
+var _husio$scrumboard$Model$CardState = F4(
+	function (a, b, c, d) {
+		return {position: a, order: b, issueUrl: c, issueId: d};
+	});
+var _husio$scrumboard$Model$decodeCardState = A5(
+	_elm_lang$core$Json_Decode$map4,
+	_husio$scrumboard$Model$CardState,
+	A2(_elm_lang$core$Json_Decode$field, 'position', _elm_lang$core$Json_Decode$int),
+	A2(_elm_lang$core$Json_Decode$field, 'order', _elm_lang$core$Json_Decode$int),
+	A2(_elm_lang$core$Json_Decode$field, 'issueUrl', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'issueId', _elm_lang$core$Json_Decode$int));
+var _husio$scrumboard$Model$decodeState = A3(
+	_elm_lang$core$Json_Decode$map2,
+	_husio$scrumboard$Model$State,
+	A2(_elm_lang$core$Json_Decode$field, 'rows', _elm_lang$core$Json_Decode$int),
+	A2(
+		_elm_lang$core$Json_Decode$field,
+		'cards',
+		_elm_lang$core$Json_Decode$list(_husio$scrumboard$Model$decodeCardState)));
+var _husio$scrumboard$Model$WsMessage = function (a) {
+	return {ctor: 'WsMessage', _0: a};
+};
+var _husio$scrumboard$Model$CloseError = {ctor: 'CloseError'};
+var _husio$scrumboard$Model$ShowIcelog = function (a) {
+	return {ctor: 'ShowIcelog', _0: a};
+};
+var _husio$scrumboard$Model$IcelogFetched = function (a) {
+	return {ctor: 'IcelogFetched', _0: a};
+};
+var _husio$scrumboard$Model$IcelogSearchChanged = function (a) {
+	return {ctor: 'IcelogSearchChanged', _0: a};
+};
+var _husio$scrumboard$Model$QueryIcelog = {ctor: 'QueryIcelog'};
+var _husio$scrumboard$Model$GithubOwnerSelected = function (a) {
+	return {ctor: 'GithubOwnerSelected', _0: a};
+};
+var _husio$scrumboard$Model$RepositoriesFetched = function (a) {
+	return {ctor: 'RepositoriesFetched', _0: a};
+};
+var _husio$scrumboard$Model$IssueRefreshed = F2(
+	function (a, b) {
+		return {ctor: 'IssueRefreshed', _0: a, _1: b};
+	});
+var _husio$scrumboard$Model$IssueFetched = F2(
+	function (a, b) {
+		return {ctor: 'IssueFetched', _0: a, _1: b};
+	});
+var _husio$scrumboard$Model$DelIssueCard = function (a) {
+	return {ctor: 'DelIssueCard', _0: a};
+};
+var _husio$scrumboard$Model$DragDrop = function (a) {
+	return {ctor: 'DragDrop', _0: a};
+};
+
+var _husio$scrumboard$Update$fetchGitHubIssueUrl = F3(
+	function (position, token, cardUrl) {
+		return A3(
+			_husio$scrumboard$GitHub$fetchIssueUrl,
+			token,
+			cardUrl,
+			_husio$scrumboard$Model$IssueFetched(position));
+	});
+var _husio$scrumboard$Update$refreshGithubIssue = F3(
+	function (position, token, cardUrl) {
+		return A3(
+			_husio$scrumboard$GitHub$fetchIssueUrl,
+			token,
+			cardUrl,
+			_husio$scrumboard$Model$IssueRefreshed(position));
+	});
+var _husio$scrumboard$Update$fetchGitHubIssue = F5(
+	function (position, token, organization, repo, issueId) {
+		return A5(
+			_husio$scrumboard$GitHub$fetchIssue,
+			token,
+			organization,
+			repo,
+			issueId,
+			_husio$scrumboard$Model$IssueFetched(position));
+	});
+var _husio$scrumboard$Update$sendStateSync = function (model) {
 	var state = A2(
 		_elm_lang$core$Json_Encode$encode,
 		2,
-		_user$project$Main$encodeState(model));
+		_husio$scrumboard$Model$encodeState(model));
 	return A2(_elm_lang$websocket$WebSocket$send, model.flags.websocketAddress, state);
 };
-var _user$project$Main$issuePathInfo = function (path) {
-	var $int = function (maybeint) {
-		return A2(
-			_elm_lang$core$Result$withDefault,
-			0,
-			_elm_lang$core$String$toInt(
-				A2(_elm_lang$core$Maybe$withDefault, '', maybeint)));
-	};
-	var str = function (maybestr) {
-		return A2(_elm_lang$core$Maybe$withDefault, '', maybestr);
-	};
-	var match = A2(
-		_elm_lang$core$Regex$find,
-		_elm_lang$core$Regex$AtMost(1),
-		_elm_lang$core$Regex$regex('^([^/]+)/(\\d+)$'));
-	var _p0 = _elm_lang$core$List$head(
-		match(path));
-	if (_p0.ctor === 'Nothing') {
-		return {ctor: '_Tuple2', _0: '', _1: 0};
-	} else {
-		var arr = _elm_lang$core$Array$fromList(
-			A2(
-				_elm_lang$core$List$map,
-				str,
-				function (_) {
-					return _.submatches;
-				}(_p0._0)));
-		return (!_elm_lang$core$Native_Utils.eq(
-			_elm_lang$core$Array$length(arr),
-			2)) ? {ctor: '_Tuple2', _0: '', _1: 0} : {
-			ctor: '_Tuple2',
-			_0: str(
-				A2(_elm_lang$core$Array$get, 0, arr)),
-			_1: $int(
-				A2(_elm_lang$core$Array$get, 1, arr))
+var _husio$scrumboard$Update$addCardTo = F4(
+	function (githubToken, dropId, drop, cards) {
+		var cmd = A3(_husio$scrumboard$Update$fetchGitHubIssueUrl, dropId, githubToken, drop.url);
+		return {ctor: '_Tuple2', _0: cards, _1: cmd};
+	});
+var _husio$scrumboard$Update$moveCardTo = F3(
+	function (dropId, drag, cards) {
+		var updatePosition = function (c) {
+			return _elm_lang$core$Native_Utils.eq(c.issue.id, drag.id) ? _elm_lang$core$Native_Utils.update(
+				c,
+				{position: dropId.position, order: dropId.order}) : c;
 		};
-	}
+		return {
+			ctor: '_Tuple2',
+			_0: A2(_elm_lang$core$List$map, updatePosition, cards),
+			_1: _elm_lang$core$Platform_Cmd$none
+		};
+	});
+var _husio$scrumboard$Update$hasCard = F2(
+	function (drag, cards) {
+		return A2(
+			_elm_lang$core$List$any,
+			function (c) {
+				return _elm_lang$core$Native_Utils.eq(c.issue.id, drag.id);
+			},
+			cards);
+	});
+var _husio$scrumboard$Update$sortCards = function (cards) {
+	var cardOrder = F2(
+		function (a, b) {
+			return (_elm_lang$core$Native_Utils.cmp(a.position, b.position) > 0) ? _elm_lang$core$Basics$GT : ((_elm_lang$core$Native_Utils.cmp(a.position, b.position) < 0) ? _elm_lang$core$Basics$LT : ((_elm_lang$core$Native_Utils.cmp(a.order, b.order) > 0) ? _elm_lang$core$Basics$GT : _elm_lang$core$Basics$LT));
+		});
+	return A2(_elm_lang$core$List$sortWith, cardOrder, cards);
 };
-var _user$project$Main$extractIssueInfo = function (path) {
-	var _p1 = _user$project$Main$issuePathInfo(path);
-	if ((_p1._0 === '') && (_p1._1 === 0)) {
-		return _elm_lang$core$Maybe$Nothing;
-	} else {
-		return _elm_lang$core$Maybe$Just(
-			{ctor: '_Tuple2', _0: _p1._0, _1: _p1._1});
-	}
+var _husio$scrumboard$Update$tidyCards = function (cards) {
+	var reorder = F2(
+		function (o, c) {
+			return _elm_lang$core$Native_Utils.update(
+				c,
+				{order: o * 2});
+		});
+	var orders = A2(_elm_lang$core$List$range, 1, 200);
+	var sorted = _husio$scrumboard$Update$sortCards(cards);
+	return A3(_elm_lang$core$List$map2, reorder, orders, sorted);
 };
-var _user$project$Main$issueLocation = function (url) {
+var _husio$scrumboard$Update$adjustRowNumber = function (model) {
+	var colnum = _elm_lang$core$Basics$toFloat(
+		_elm_lang$core$List$length(_husio$scrumboard$Model$columns));
+	var maxrow = _elm_lang$core$Basics$toFloat(
+		A2(
+			_elm_lang$core$Maybe$withDefault,
+			0,
+			_elm_lang$core$List$maximum(
+				A2(
+					_elm_lang$core$List$map,
+					function (_) {
+						return _.position;
+					},
+					model.cards))));
+	var needrows = _elm_lang$core$Basics$ceiling(maxrow / colnum);
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{rows: needrows + 1});
+};
+var _husio$scrumboard$Update$update = F2(
+	function (msg, model) {
+		var _p0 = msg;
+		switch (_p0.ctor) {
+			case 'CloseError':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{error: _elm_lang$core$Maybe$Nothing}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'RepositoriesFetched':
+				if (_p0._0.ctor === 'Ok') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{repositories: _p0._0._0}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								error: _elm_lang$core$Maybe$Just(
+									_elm_lang$core$Basics$toString(_p0._0._0))
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			case 'GithubOwnerSelected':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{githubOrg: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'WsMessage':
+				var _p1 = A2(_elm_lang$core$Json_Decode$decodeString, _husio$scrumboard$Model$decodeState, _p0._0);
+				if (_p1.ctor === 'Err') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								error: _elm_lang$core$Maybe$Just(_p1._0)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					var _p4 = _p1._0;
+					var noop = function (a) {
+						return a;
+					};
+					var idx = _elm_lang$core$Dict$fromList(
+						A2(
+							_elm_lang$core$List$map,
+							function (c) {
+								return {ctor: '_Tuple2', _0: c.issue.id, _1: c};
+							},
+							model.cards));
+					var update = function (sc) {
+						var _p2 = A2(_elm_lang$core$Dict$get, sc.issueId, idx);
+						if (_p2.ctor === 'Nothing') {
+							return {
+								ctor: '_Tuple2',
+								_0: _elm_lang$core$Maybe$Nothing,
+								_1: A3(
+									_husio$scrumboard$Update$refreshGithubIssue,
+									A2(_husio$scrumboard$Model$DroppableID, sc.position, sc.order),
+									model.flags.githubToken,
+									sc.issueUrl)
+							};
+						} else {
+							return {
+								ctor: '_Tuple2',
+								_0: _elm_lang$core$Maybe$Just(
+									_elm_lang$core$Native_Utils.update(
+										_p2._0,
+										{position: sc.position})),
+								_1: _elm_lang$core$Platform_Cmd$none
+							};
+						}
+					};
+					var _p3 = _elm_lang$core$List$unzip(
+						A2(_elm_lang$core$List$map, update, _p4.cards));
+					var maybeCards = _p3._0;
+					var cmds = _p3._1;
+					var cards = A2(_elm_lang$core$List$filterMap, noop, maybeCards);
+					var m = _husio$scrumboard$Update$adjustRowNumber(
+						_elm_lang$core$Native_Utils.update(
+							model,
+							{
+								rows: _p4.rows,
+								cards: _husio$scrumboard$Update$tidyCards(cards)
+							}));
+					return {
+						ctor: '_Tuple2',
+						_0: m,
+						_1: _elm_lang$core$Platform_Cmd$batch(cmds)
+					};
+				}
+			case 'QueryIcelog':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A3(_husio$scrumboard$GitHub$searchIssues, model.flags.githubToken, model.icelogQuery, _husio$scrumboard$Model$IcelogFetched)
+				};
+			case 'IcelogSearchChanged':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{icelogQuery: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'IssueFetched':
+				if (_p0._1.ctor === 'Ok') {
+					var _p6 = _p0._0;
+					var _p5 = _p0._1._0;
+					var withoutFetched = A2(
+						_elm_lang$core$List$filter,
+						function (c) {
+							return !_elm_lang$core$Native_Utils.eq(c.issue.id, _p5.id);
+						},
+						model.cards);
+					var card = A3(_husio$scrumboard$Model$Card, _p6.position, _p6.order, _p5);
+					var cards = A2(
+						_elm_lang$core$Basics_ops['++'],
+						withoutFetched,
+						{
+							ctor: '::',
+							_0: card,
+							_1: {ctor: '[]'}
+						});
+					var m = _husio$scrumboard$Update$adjustRowNumber(
+						_elm_lang$core$Native_Utils.update(
+							model,
+							{
+								cards: _husio$scrumboard$Update$tidyCards(cards)
+							}));
+					return {
+						ctor: '_Tuple2',
+						_0: m,
+						_1: _husio$scrumboard$Update$sendStateSync(m)
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								error: _elm_lang$core$Maybe$Just(
+									_elm_lang$core$Basics$toString(_p0._1._0))
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			case 'IcelogFetched':
+				if (_p0._0.ctor === 'Ok') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{icelog: _p0._0._0}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								error: _elm_lang$core$Maybe$Just(
+									_elm_lang$core$Basics$toString(_p0._0._0))
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			case 'ShowIcelog':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{showIcelog: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'IssueRefreshed':
+				if (_p0._1.ctor === 'Ok') {
+					var _p8 = _p0._0;
+					var _p7 = _p0._1._0;
+					var withoutFetched = A2(
+						_elm_lang$core$List$filter,
+						function (c) {
+							return !_elm_lang$core$Native_Utils.eq(c.issue.id, _p7.id);
+						},
+						model.cards);
+					var card = A3(_husio$scrumboard$Model$Card, _p8.position, _p8.order, _p7);
+					var cards = A2(
+						_elm_lang$core$Basics_ops['++'],
+						withoutFetched,
+						{
+							ctor: '::',
+							_0: card,
+							_1: {ctor: '[]'}
+						});
+					var m = _husio$scrumboard$Update$adjustRowNumber(
+						_elm_lang$core$Native_Utils.update(
+							model,
+							{
+								cards: _husio$scrumboard$Update$tidyCards(cards)
+							}));
+					return {ctor: '_Tuple2', _0: m, _1: _elm_lang$core$Platform_Cmd$none};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								error: _elm_lang$core$Maybe$Just(
+									_elm_lang$core$Basics$toString(_p0._1._0))
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			case 'DragDrop':
+				var _p9 = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$updateSticky, _p0._0, model.dragDrop);
+				var dragModel = _p9._0;
+				var result = _p9._1;
+				var dragId = A2(
+					_elm_lang$core$Maybe$withDefault,
+					_husio$scrumboard$Model$emptyDraggable,
+					_norpan$elm_html5_drag_drop$Html5_DragDrop$getDragId(dragModel));
+				var dropId = A2(
+					_elm_lang$core$Maybe$withDefault,
+					_husio$scrumboard$Model$emptyDroppable,
+					_norpan$elm_html5_drag_drop$Html5_DragDrop$getDropId(dragModel));
+				var _p10 = A2(_husio$scrumboard$Update$hasCard, dragId, model.cards) ? A3(_husio$scrumboard$Update$moveCardTo, dropId, dragId, model.cards) : (_elm_lang$core$Native_Utils.eq(dragId, _husio$scrumboard$Model$emptyDraggable) ? {ctor: '_Tuple2', _0: model.cards, _1: _elm_lang$core$Platform_Cmd$none} : A4(_husio$scrumboard$Update$addCardTo, model.flags.githubToken, dropId, dragId, model.cards));
+				var cards = _p10._0;
+				var cardCmd = _p10._1;
+				var m = _husio$scrumboard$Update$adjustRowNumber(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{
+							dragDrop: dragModel,
+							cards: _husio$scrumboard$Update$tidyCards(cards)
+						}));
+				var syncCmd = function () {
+					var _p11 = result;
+					if (_p11.ctor === 'Just') {
+						return _husio$scrumboard$Update$sendStateSync(m);
+					} else {
+						return _elm_lang$core$Platform_Cmd$none;
+					}
+				}();
+				return {
+					ctor: '_Tuple2',
+					_0: m,
+					_1: _elm_lang$core$Platform_Cmd$batch(
+						{
+							ctor: '::',
+							_0: syncCmd,
+							_1: {
+								ctor: '::',
+								_0: cardCmd,
+								_1: {ctor: '[]'}
+							}
+						})
+				};
+			default:
+				var cards = A2(
+					_elm_lang$core$List$filter,
+					function (c) {
+						return !_elm_lang$core$Native_Utils.eq(c.issue.id, _p0._0);
+					},
+					model.cards);
+				var m = _husio$scrumboard$Update$adjustRowNumber(
+					_elm_lang$core$Native_Utils.update(
+						model,
+						{cards: cards}));
+				return {
+					ctor: '_Tuple2',
+					_0: m,
+					_1: _husio$scrumboard$Update$sendStateSync(m)
+				};
+		}
+	});
+
+var _husio$scrumboard$View$cardDropId = function (card) {
+	return A2(_husio$scrumboard$Model$DroppableID, card.position, card.order);
+};
+var _husio$scrumboard$View$issueDragId = function (issue) {
+	return {id: issue.id, url: issue.url};
+};
+var _husio$scrumboard$View$cardDragId = function (card) {
+	return _husio$scrumboard$View$issueDragId(card.issue);
+};
+var _husio$scrumboard$View$issueLocation = function (url) {
 	var match = _elm_lang$core$List$head(
 		A3(
 			_elm_lang$core$Regex$find,
 			_elm_lang$core$Regex$AtMost(1),
 			_elm_lang$core$Regex$regex('repos/[^/]+/([^/]+)/issues/(\\d+)$'),
 			url));
-	var _p2 = match;
-	if (_p2.ctor === 'Nothing') {
+	var _p0 = match;
+	if (_p0.ctor === 'Nothing') {
 		return '';
 	} else {
 		return A2(
@@ -11845,10 +10746,25 @@ var _user$project$Main$issueLocation = function (url) {
 			A2(
 				_elm_lang$core$List$map,
 				_elm_lang$core$Maybe$withDefault(''),
-				_p2._0.submatches));
+				_p0._0.submatches));
 	}
 };
-var _user$project$Main$viewLabel = function (label) {
+var _husio$scrumboard$View$icon = function (name) {
+	return A2(
+		_elm_lang$html$Html$i,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class(
+				A2(_elm_lang$core$Basics_ops['++'], 'fa fa-', name)),
+			_1: {
+				ctor: '::',
+				_0: A2(_elm_lang$html$Html_Attributes$attribute, 'aria-hidden', 'true'),
+				_1: {ctor: '[]'}
+			}
+		},
+		{ctor: '[]'});
+};
+var _husio$scrumboard$View$viewLabel = function (label) {
 	var attrs = {
 		ctor: '::',
 		_0: _elm_lang$html$Html_Attributes$style(
@@ -11884,7 +10800,7 @@ var _user$project$Main$viewLabel = function (label) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$Main$viewAssignee = function (user) {
+var _husio$scrumboard$View$viewAssignee = function (user) {
 	var url = A2(_elm_lang$core$Basics_ops['++'], user.avatarUrl, '&s=18');
 	return A2(
 		_elm_lang$html$Html$img,
@@ -11899,13 +10815,13 @@ var _user$project$Main$viewAssignee = function (user) {
 		},
 		{ctor: '[]'});
 };
-var _user$project$Main$cardBorder = function (issue) {
+var _husio$scrumboard$View$cardBorder = function (issue) {
 	var color = function () {
-		var _p3 = _elm_lang$core$List$head(issue.labels);
-		if (_p3.ctor === 'Nothing') {
+		var _p1 = _elm_lang$core$List$head(issue.labels);
+		if (_p1.ctor === 'Nothing') {
 			return '#C2E4EF';
 		} else {
-			return A2(_elm_lang$core$Basics_ops['++'], '#', _p3._0.color);
+			return A2(_elm_lang$core$Basics_ops['++'], '#', _p1._0.color);
 		}
 	}();
 	return _elm_lang$html$Html_Attributes$style(
@@ -11919,7 +10835,160 @@ var _user$project$Main$cardBorder = function (issue) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$Main$onlyContained = F2(
+var _husio$scrumboard$View$viewCard = F2(
+	function (dragId, card) {
+		var assignees = A2(_elm_lang$core$List$map, _husio$scrumboard$View$viewAssignee, card.issue.assignees);
+		var labels = A2(_elm_lang$core$List$map, _husio$scrumboard$View$viewLabel, card.issue.labels);
+		var dropAttrs = A2(
+			_norpan$elm_html5_drag_drop$Html5_DragDrop$droppable,
+			_husio$scrumboard$Model$DragDrop,
+			_husio$scrumboard$View$cardDropId(card));
+		var dragattr = A2(
+			_norpan$elm_html5_drag_drop$Html5_DragDrop$draggable,
+			_husio$scrumboard$Model$DragDrop,
+			_husio$scrumboard$View$cardDragId(card));
+		var placeholderClass = _elm_lang$core$Native_Utils.eq(
+			A2(_elm_lang$core$Maybe$withDefault, _husio$scrumboard$Model$emptyDraggable, dragId),
+			_husio$scrumboard$View$cardDragId(card)) ? _elm_lang$html$Html_Attributes$class('card-placeholder') : _elm_lang$html$Html_Attributes$class('');
+		var attrs = A2(
+			_elm_lang$core$Basics_ops['++'],
+			{
+				ctor: '::',
+				_0: placeholderClass,
+				_1: {
+					ctor: '::',
+					_0: _husio$scrumboard$View$cardBorder(card.issue),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('card'),
+						_1: dragattr
+					}
+				}
+			},
+			dropAttrs);
+		return A2(
+			_elm_lang$html$Html$div,
+			attrs,
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$span,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Events$onClick(
+							_husio$scrumboard$Model$DelIssueCard(card.issue.id)),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('card-remove'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$title('Remove from the board'),
+								_1: {ctor: '[]'}
+							}
+						}
+					},
+					{
+						ctor: '::',
+						_0: _husio$scrumboard$View$icon('trash-o'),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$a,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$title(card.issue.body),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class(
+									A2(_elm_lang$core$Basics_ops['++'], 'card-title state-', card.issue.state)),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$href(card.issue.htmlUrl),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$target('_blank'),
+										_1: {ctor: '[]'}
+									}
+								}
+							}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(card.issue.title),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('card-meta'),
+								_1: {ctor: '[]'}
+							},
+							A2(
+								_elm_lang$core$Basics_ops['++'],
+								labels,
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$div,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$class('card-metainfo'),
+											_1: {ctor: '[]'}
+										},
+										assignees),
+									_1: {
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$div,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$class('card-metainfo'),
+												_1: {ctor: '[]'}
+											},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text(
+													_husio$scrumboard$View$issueLocation(card.issue.url)),
+												_1: {
+													ctor: '::',
+													_0: _husio$scrumboard$View$icon('code-fork'),
+													_1: {ctor: '[]'}
+												}
+											}),
+										_1: {
+											ctor: '::',
+											_0: A2(
+												_elm_lang$html$Html$div,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$class('card-metainfo'),
+													_1: {ctor: '[]'}
+												},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text(
+														_elm_lang$core$Basics$toString(card.issue.comments)),
+													_1: {
+														ctor: '::',
+														_0: _husio$scrumboard$View$icon('comments-o'),
+														_1: {ctor: '[]'}
+													}
+												}),
+											_1: {ctor: '[]'}
+										}
+									}
+								})),
+						_1: {ctor: '[]'}
+					}
+				}
+			});
+	});
+var _husio$scrumboard$View$onlyContained = F2(
 	function (dropId, cards) {
 		return A2(
 			_elm_lang$core$List$filter,
@@ -11928,7 +10997,77 @@ var _user$project$Main$onlyContained = F2(
 			},
 			cards);
 	});
-var _user$project$Main$viewHeaders = function (headers) {
+var _husio$scrumboard$View$viewCardDrophelper = function (dropId) {
+	var dropAttrs = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$droppable, _husio$scrumboard$Model$DragDrop, dropId);
+	var attrs = {
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$class('drop-helper'),
+		_1: dropAttrs
+	};
+	return A2(
+		_elm_lang$html$Html$div,
+		attrs,
+		{ctor: '[]'});
+};
+var _husio$scrumboard$View$viewCell = F3(
+	function (dragId, cards, dropId) {
+		var afterHelper = _husio$scrumboard$View$viewCardDrophelper(
+			A2(_husio$scrumboard$Model$DroppableID, dropId.position, 1000));
+		var beforeHelper = _husio$scrumboard$View$viewCardDrophelper(
+			A2(_husio$scrumboard$Model$DroppableID, dropId.position, 0));
+		var dropAttr = {ctor: '[]'};
+		var attrs = A2(
+			_elm_lang$core$Basics_ops['++'],
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('board-cell'),
+				_1: {ctor: '[]'}
+			},
+			dropAttr);
+		var contains = A2(_husio$scrumboard$View$onlyContained, dropId, cards);
+		var cardViews = A2(
+			_elm_lang$core$List$map,
+			_husio$scrumboard$View$viewCard(dragId),
+			contains);
+		return A2(
+			_elm_lang$html$Html$div,
+			attrs,
+			{
+				ctor: '::',
+				_0: beforeHelper,
+				_1: A2(
+					_elm_lang$core$Basics_ops['++'],
+					cardViews,
+					{
+						ctor: '::',
+						_0: afterHelper,
+						_1: {ctor: '[]'}
+					})
+			});
+	});
+var _husio$scrumboard$View$viewRow = F3(
+	function (_p2, dragId, cards) {
+		var _p3 = _p2;
+		var droppablePositions = A2(_elm_lang$core$List$range, _p3._0.position, _p3._1.position);
+		var droppableIds = A3(
+			_elm_lang$core$List$map2,
+			_husio$scrumboard$Model$DroppableID,
+			droppablePositions,
+			A2(_elm_lang$core$List$range, 0, 30));
+		var dropzones = A2(
+			_elm_lang$core$List$map,
+			A2(_husio$scrumboard$View$viewCell, dragId, cards),
+			droppableIds);
+		return A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('board-row'),
+				_1: {ctor: '[]'}
+			},
+			dropzones);
+	});
+var _husio$scrumboard$View$viewHeaders = function (headers) {
 	var viewHeader = function (title) {
 		return A2(
 			_elm_lang$html$Html$strong,
@@ -11953,594 +11092,22 @@ var _user$project$Main$viewHeaders = function (headers) {
 		},
 		rows);
 };
-var _user$project$Main$isNothing = function (maybe) {
-	var _p4 = maybe;
-	if (_p4.ctor === 'Just') {
-		return false;
-	} else {
-		return true;
-	}
-};
-var _user$project$Main$sortCards = function (cards) {
-	var cardOrder = F2(
-		function (a, b) {
-			return (_elm_lang$core$Native_Utils.cmp(a.position, b.position) > 0) ? _elm_lang$core$Basics$GT : ((_elm_lang$core$Native_Utils.cmp(a.position, b.position) < 0) ? _elm_lang$core$Basics$LT : ((_elm_lang$core$Native_Utils.cmp(a.order, b.order) > 0) ? _elm_lang$core$Basics$GT : _elm_lang$core$Basics$LT));
-		});
-	return A2(_elm_lang$core$List$sortWith, cardOrder, cards);
-};
-var _user$project$Main$tidyCards = function (cards) {
-	var reorder = F2(
-		function (o, c) {
-			return _elm_lang$core$Native_Utils.update(
-				c,
-				{order: o * 2});
-		});
-	var orders = A2(_elm_lang$core$List$range, 1, 200);
-	var sorted = _user$project$Main$sortCards(cards);
-	return A3(_elm_lang$core$List$map2, reorder, orders, sorted);
-};
-var _user$project$Main$emptyDroppable = {position: 1, order: 0};
-var _user$project$Main$emptyDraggable = {id: 0, url: 'http:///issue-without-url'};
-var _user$project$Main$columns = {
-	ctor: '::',
-	_0: 'Story',
-	_1: {
-		ctor: '::',
-		_0: 'To do',
-		_1: {
-			ctor: '::',
-			_0: 'In progress',
-			_1: {
-				ctor: '::',
-				_0: 'Done',
-				_1: {ctor: '[]'}
-			}
-		}
-	}
-};
-var _user$project$Main$adjustRowNumber = function (model) {
-	var colnum = _elm_lang$core$Basics$toFloat(
-		_elm_lang$core$List$length(_user$project$Main$columns));
-	var maxrow = _elm_lang$core$Basics$toFloat(
-		A2(
-			_elm_lang$core$Maybe$withDefault,
-			0,
-			_elm_lang$core$List$maximum(
-				A2(
-					_elm_lang$core$List$map,
-					function (_) {
-						return _.position;
-					},
-					model.cards))));
-	var needrows = _elm_lang$core$Basics$ceiling(maxrow / colnum);
-	return _elm_lang$core$Native_Utils.update(
-		model,
-		{rows: needrows + 1});
-};
-var _user$project$Main$ProgramFlags = F2(
-	function (a, b) {
-		return {githubToken: a, websocketAddress: b};
-	});
-var _user$project$Main$DraggableID = F2(
-	function (a, b) {
-		return {id: a, url: b};
-	});
-var _user$project$Main$DroppableID = F2(
-	function (a, b) {
-		return {position: a, order: b};
-	});
-var _user$project$Main$cardDropId = function (card) {
-	return A2(_user$project$Main$DroppableID, card.position, card.order);
-};
-var _user$project$Main$Model = function (a) {
-	return function (b) {
-		return function (c) {
-			return function (d) {
-				return function (e) {
-					return function (f) {
-						return function (g) {
-							return function (h) {
-								return function (i) {
-									return function (j) {
-										return {cards: a, dragDrop: b, rows: c, icelog: d, icelogQuery: e, showIcelog: f, error: g, flags: h, githubOrg: i, repositories: j};
-									};
-								};
-							};
-						};
-					};
-				};
-			};
-		};
-	};
-};
-var _user$project$Main$Card = F3(
-	function (a, b, c) {
-		return {position: a, order: b, issue: c};
-	});
-var _user$project$Main$State = F2(
-	function (a, b) {
-		return {rows: a, cards: b};
-	});
-var _user$project$Main$CardState = F4(
-	function (a, b, c, d) {
-		return {position: a, order: b, issueUrl: c, issueId: d};
-	});
-var _user$project$Main$decodeCardState = A5(
-	_elm_lang$core$Json_Decode$map4,
-	_user$project$Main$CardState,
-	A2(_elm_lang$core$Json_Decode$field, 'position', _elm_lang$core$Json_Decode$int),
-	A2(_elm_lang$core$Json_Decode$field, 'order', _elm_lang$core$Json_Decode$int),
-	A2(_elm_lang$core$Json_Decode$field, 'issueUrl', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'issueId', _elm_lang$core$Json_Decode$int));
-var _user$project$Main$decodeState = A3(
-	_elm_lang$core$Json_Decode$map2,
-	_user$project$Main$State,
-	A2(_elm_lang$core$Json_Decode$field, 'rows', _elm_lang$core$Json_Decode$int),
-	A2(
-		_elm_lang$core$Json_Decode$field,
-		'cards',
-		_elm_lang$core$Json_Decode$list(_user$project$Main$decodeCardState)));
-var _user$project$Main$WsMessage = function (a) {
-	return {ctor: 'WsMessage', _0: a};
-};
-var _user$project$Main$subscriptions = function (model) {
-	return A2(_elm_lang$websocket$WebSocket$listen, model.flags.websocketAddress, _user$project$Main$WsMessage);
-};
-var _user$project$Main$CloseError = {ctor: 'CloseError'};
-var _user$project$Main$ShowIcelog = function (a) {
-	return {ctor: 'ShowIcelog', _0: a};
-};
-var _user$project$Main$IcelogFetched = function (a) {
-	return {ctor: 'IcelogFetched', _0: a};
-};
-var _user$project$Main$IcelogSearchChanged = function (a) {
-	return {ctor: 'IcelogSearchChanged', _0: a};
-};
-var _user$project$Main$QueryIcelog = {ctor: 'QueryIcelog'};
-var _user$project$Main$GithubOwnerSelected = function (a) {
-	return {ctor: 'GithubOwnerSelected', _0: a};
-};
-var _user$project$Main$viewGithubOwnerSelector = function (repositories) {
-	var viewOption = function (name) {
-		return A2(
-			_elm_lang$html$Html$option,
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$value(name),
-				_1: {ctor: '[]'}
-			},
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html$text(name),
-				_1: {ctor: '[]'}
-			});
-	};
-	var names = _elm_community$list_extra$List_Extra$unique(
-		A2(
-			_elm_lang$core$List$map,
-			function (_) {
-				return _.login;
-			},
-			A2(
-				_elm_lang$core$List$map,
-				function (_) {
-					return _.owner;
-				},
-				repositories)));
-	var nameByIndex = function (maybeIdx) {
-		var _p5 = maybeIdx;
-		if (_p5.ctor === 'Nothing') {
-			return _user$project$Main$GithubOwnerSelected('');
-		} else {
-			return _user$project$Main$GithubOwnerSelected(
-				A2(
-					_elm_lang$core$Maybe$withDefault,
-					'',
-					A2(
-						_elm_lang$core$Array$get,
-						_p5._0,
-						_elm_lang$core$Array$fromList(names))));
-		}
-	};
-	var selectEvent = A2(
-		_elm_lang$html$Html_Events$on,
-		'change',
-		A2(_elm_lang$core$Json_Decode$map, nameByIndex, _elm_community$html_extra$Html_Events_Extra$targetSelectedIndex));
-	var options = A2(_elm_lang$core$List$map, viewOption, names);
-	return A2(
-		_elm_lang$html$Html$select,
-		{
-			ctor: '::',
-			_0: selectEvent,
-			_1: {ctor: '[]'}
-		},
-		options);
-};
-var _user$project$Main$RepositoriesFetched = function (a) {
-	return {ctor: 'RepositoriesFetched', _0: a};
-};
-var _user$project$Main$init = function (flags) {
-	var fetchIcelog = A2(_user$project$GitHub$fetchIssues, flags.githubToken, _user$project$Main$IcelogFetched);
-	var fetchReposCmd = A2(_user$project$GitHub$fetchUserRepos, flags.githubToken, _user$project$Main$RepositoriesFetched);
-	var model = {
-		cards: {ctor: '[]'},
-		dragDrop: _norpan$elm_html5_drag_drop$Html5_DragDrop$init,
-		rows: 3,
-		icelog: {ctor: '[]'},
-		icelogQuery: '',
-		showIcelog: false,
-		error: _elm_lang$core$Maybe$Nothing,
-		flags: flags,
-		githubOrg: '',
-		repositories: {ctor: '[]'}
-	};
-	return {
-		ctor: '_Tuple2',
-		_0: model,
-		_1: _elm_lang$core$Platform_Cmd$batch(
-			{
-				ctor: '::',
-				_0: fetchReposCmd,
-				_1: {
-					ctor: '::',
-					_0: fetchIcelog,
-					_1: {ctor: '[]'}
-				}
-			})
-	};
-};
-var _user$project$Main$IssueRefreshed = F2(
-	function (a, b) {
-		return {ctor: 'IssueRefreshed', _0: a, _1: b};
-	});
-var _user$project$Main$refreshGithubIssue = F3(
-	function (position, token, cardUrl) {
-		return A3(
-			_user$project$GitHub$fetchIssueUrl,
-			token,
-			cardUrl,
-			_user$project$Main$IssueRefreshed(position));
-	});
-var _user$project$Main$IssueFetched = F2(
-	function (a, b) {
-		return {ctor: 'IssueFetched', _0: a, _1: b};
-	});
-var _user$project$Main$fetchGitHubIssue = F5(
-	function (position, token, organization, repo, issueId) {
-		return A5(
-			_user$project$GitHub$fetchIssue,
-			token,
-			organization,
-			repo,
-			issueId,
-			_user$project$Main$IssueFetched(position));
-	});
-var _user$project$Main$fetchGitHubIssueUrl = F3(
-	function (position, token, cardUrl) {
-		return A3(
-			_user$project$GitHub$fetchIssueUrl,
-			token,
-			cardUrl,
-			_user$project$Main$IssueFetched(position));
-	});
-var _user$project$Main$addCardTo = F4(
-	function (githubToken, dropId, drop, cards) {
-		var cmd = A3(_user$project$Main$fetchGitHubIssueUrl, dropId, githubToken, drop.url);
-		return {ctor: '_Tuple2', _0: cards, _1: cmd};
-	});
-var _user$project$Main$update = F2(
-	function (msg, model) {
-		var _p6 = msg;
-		switch (_p6.ctor) {
-			case 'CloseError':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{error: _elm_lang$core$Maybe$Nothing}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'RepositoriesFetched':
-				if (_p6._0.ctor === 'Ok') {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{repositories: _p6._0._0}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				} else {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								error: _elm_lang$core$Maybe$Just(
-									_elm_lang$core$Basics$toString(_p6._0._0))
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				}
-			case 'GithubOwnerSelected':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{githubOrg: _p6._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'WsMessage':
-				var _p7 = A2(_elm_lang$core$Json_Decode$decodeString, _user$project$Main$decodeState, _p6._0);
-				if (_p7.ctor === 'Err') {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								error: _elm_lang$core$Maybe$Just(_p7._0)
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				} else {
-					var _p10 = _p7._0;
-					var noop = function (a) {
-						return a;
-					};
-					var idx = _elm_lang$core$Dict$fromList(
-						A2(
-							_elm_lang$core$List$map,
-							function (c) {
-								return {ctor: '_Tuple2', _0: c.issue.id, _1: c};
-							},
-							model.cards));
-					var update = function (sc) {
-						var _p8 = A2(_elm_lang$core$Dict$get, sc.issueId, idx);
-						if (_p8.ctor === 'Nothing') {
-							return {
-								ctor: '_Tuple2',
-								_0: _elm_lang$core$Maybe$Nothing,
-								_1: A3(
-									_user$project$Main$refreshGithubIssue,
-									A2(_user$project$Main$DroppableID, sc.position, sc.order),
-									model.flags.githubToken,
-									sc.issueUrl)
-							};
-						} else {
-							return {
-								ctor: '_Tuple2',
-								_0: _elm_lang$core$Maybe$Just(
-									_elm_lang$core$Native_Utils.update(
-										_p8._0,
-										{position: sc.position})),
-								_1: _elm_lang$core$Platform_Cmd$none
-							};
-						}
-					};
-					var _p9 = _elm_lang$core$List$unzip(
-						A2(_elm_lang$core$List$map, update, _p10.cards));
-					var maybeCards = _p9._0;
-					var cmds = _p9._1;
-					var cards = A2(_elm_lang$core$List$filterMap, noop, maybeCards);
-					var m = _user$project$Main$adjustRowNumber(
-						_elm_lang$core$Native_Utils.update(
-							model,
-							{
-								rows: _p10.rows,
-								cards: _user$project$Main$tidyCards(cards)
-							}));
-					return {
-						ctor: '_Tuple2',
-						_0: m,
-						_1: _elm_lang$core$Platform_Cmd$batch(cmds)
-					};
-				}
-			case 'QueryIcelog':
-				return {
-					ctor: '_Tuple2',
-					_0: model,
-					_1: A3(_user$project$GitHub$searchIssues, model.flags.githubToken, model.icelogQuery, _user$project$Main$IcelogFetched)
-				};
-			case 'IcelogSearchChanged':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{icelogQuery: _p6._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'IssueFetched':
-				if (_p6._1.ctor === 'Ok') {
-					var _p12 = _p6._0;
-					var _p11 = _p6._1._0;
-					var withoutFetched = A2(
-						_elm_lang$core$List$filter,
-						function (c) {
-							return !_elm_lang$core$Native_Utils.eq(c.issue.id, _p11.id);
-						},
-						model.cards);
-					var card = A3(_user$project$Main$Card, _p12.position, _p12.order, _p11);
-					var cards = A2(
-						_elm_lang$core$Basics_ops['++'],
-						withoutFetched,
-						{
-							ctor: '::',
-							_0: card,
-							_1: {ctor: '[]'}
-						});
-					var m = _user$project$Main$adjustRowNumber(
-						_elm_lang$core$Native_Utils.update(
-							model,
-							{
-								cards: _user$project$Main$tidyCards(cards)
-							}));
-					return {
-						ctor: '_Tuple2',
-						_0: m,
-						_1: _user$project$Main$sendStateSync(m)
-					};
-				} else {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								error: _elm_lang$core$Maybe$Just(
-									_elm_lang$core$Basics$toString(_p6._1._0))
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				}
-			case 'IcelogFetched':
-				if (_p6._0.ctor === 'Ok') {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{icelog: _p6._0._0}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				} else {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								error: _elm_lang$core$Maybe$Just(
-									_elm_lang$core$Basics$toString(_p6._0._0))
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				}
-			case 'ShowIcelog':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{showIcelog: _p6._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'IssueRefreshed':
-				if (_p6._1.ctor === 'Ok') {
-					var _p14 = _p6._0;
-					var _p13 = _p6._1._0;
-					var withoutFetched = A2(
-						_elm_lang$core$List$filter,
-						function (c) {
-							return !_elm_lang$core$Native_Utils.eq(c.issue.id, _p13.id);
-						},
-						model.cards);
-					var card = A3(_user$project$Main$Card, _p14.position, _p14.order, _p13);
-					var cards = A2(
-						_elm_lang$core$Basics_ops['++'],
-						withoutFetched,
-						{
-							ctor: '::',
-							_0: card,
-							_1: {ctor: '[]'}
-						});
-					var m = _user$project$Main$adjustRowNumber(
-						_elm_lang$core$Native_Utils.update(
-							model,
-							{
-								cards: _user$project$Main$tidyCards(cards)
-							}));
-					return {ctor: '_Tuple2', _0: m, _1: _elm_lang$core$Platform_Cmd$none};
-				} else {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								error: _elm_lang$core$Maybe$Just(
-									_elm_lang$core$Basics$toString(_p6._1._0))
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				}
-			case 'DragDrop':
-				var _p15 = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$updateSticky, _p6._0, model.dragDrop);
-				var dragModel = _p15._0;
-				var result = _p15._1;
-				var dragId = A2(
-					_elm_lang$core$Maybe$withDefault,
-					_user$project$Main$emptyDraggable,
-					_norpan$elm_html5_drag_drop$Html5_DragDrop$getDragId(dragModel));
-				var dropId = A2(
-					_elm_lang$core$Maybe$withDefault,
-					_user$project$Main$emptyDroppable,
-					_norpan$elm_html5_drag_drop$Html5_DragDrop$getDropId(dragModel));
-				var _p16 = A2(_user$project$Main$hasCard, dragId, model.cards) ? A3(_user$project$Main$moveCardTo, dropId, dragId, model.cards) : (_elm_lang$core$Native_Utils.eq(dragId, _user$project$Main$emptyDraggable) ? {ctor: '_Tuple2', _0: model.cards, _1: _elm_lang$core$Platform_Cmd$none} : A4(_user$project$Main$addCardTo, model.flags.githubToken, dropId, dragId, model.cards));
-				var cards = _p16._0;
-				var cardCmd = _p16._1;
-				var m = _user$project$Main$adjustRowNumber(
-					_elm_lang$core$Native_Utils.update(
-						model,
-						{
-							dragDrop: dragModel,
-							cards: _user$project$Main$tidyCards(cards)
-						}));
-				var syncCmd = function () {
-					var _p17 = result;
-					if (_p17.ctor === 'Just') {
-						return _user$project$Main$sendStateSync(m);
-					} else {
-						return _elm_lang$core$Platform_Cmd$none;
-					}
-				}();
-				return {
-					ctor: '_Tuple2',
-					_0: m,
-					_1: _elm_lang$core$Platform_Cmd$batch(
-						{
-							ctor: '::',
-							_0: syncCmd,
-							_1: {
-								ctor: '::',
-								_0: cardCmd,
-								_1: {ctor: '[]'}
-							}
-						})
-				};
-			default:
-				var cards = A2(
-					_elm_lang$core$List$filter,
-					function (c) {
-						return !_elm_lang$core$Native_Utils.eq(c.issue.id, _p6._0);
-					},
-					model.cards);
-				var m = _user$project$Main$adjustRowNumber(
-					_elm_lang$core$Native_Utils.update(
-						model,
-						{cards: cards}));
-				return {
-					ctor: '_Tuple2',
-					_0: m,
-					_1: _user$project$Main$sendStateSync(m)
-				};
-		}
-	});
-var _user$project$Main$DelIssueCard = function (a) {
-	return {ctor: 'DelIssueCard', _0: a};
-};
-var _user$project$Main$DragDrop = function (a) {
-	return {ctor: 'DragDrop', _0: a};
-};
-var _user$project$Main$viewIcelogIssue = function (issue) {
+var _husio$scrumboard$View$viewIcelogIssue = function (issue) {
 	var dragattr = A2(
 		_norpan$elm_html5_drag_drop$Html5_DragDrop$draggable,
-		_user$project$Main$DragDrop,
-		_user$project$Main$issueDragId(issue));
+		_husio$scrumboard$Model$DragDrop,
+		_husio$scrumboard$View$issueDragId(issue));
 	var attrs = {
 		ctor: '::',
-		_0: _user$project$Main$cardBorder(issue),
+		_0: _husio$scrumboard$View$cardBorder(issue),
 		_1: {
 			ctor: '::',
 			_0: _elm_lang$html$Html_Attributes$class('card'),
 			_1: dragattr
 		}
 	};
-	var labels = A2(_elm_lang$core$List$map, _user$project$Main$viewLabel, issue.labels);
-	var assignees = A2(_elm_lang$core$List$map, _user$project$Main$viewAssignee, issue.assignees);
+	var labels = A2(_elm_lang$core$List$map, _husio$scrumboard$View$viewLabel, issue.labels);
+	var assignees = A2(_elm_lang$core$List$map, _husio$scrumboard$View$viewAssignee, issue.assignees);
 	return A2(
 		_elm_lang$html$Html$div,
 		attrs,
@@ -12605,10 +11172,10 @@ var _user$project$Main$viewIcelogIssue = function (issue) {
 									{
 										ctor: '::',
 										_0: _elm_lang$html$Html$text(
-											_user$project$Main$issueLocation(issue.url)),
+											_husio$scrumboard$View$issueLocation(issue.url)),
 										_1: {
 											ctor: '::',
-											_0: _user$project$Main$icon('code-fork'),
+											_0: _husio$scrumboard$View$icon('code-fork'),
 											_1: {ctor: '[]'}
 										}
 									}),
@@ -12627,7 +11194,7 @@ var _user$project$Main$viewIcelogIssue = function (issue) {
 												_elm_lang$core$Basics$toString(issue.comments)),
 											_1: {
 												ctor: '::',
-												_0: _user$project$Main$icon('comments-o'),
+												_0: _husio$scrumboard$View$icon('comments-o'),
 												_1: {ctor: '[]'}
 											}
 										}),
@@ -12639,8 +11206,8 @@ var _user$project$Main$viewIcelogIssue = function (issue) {
 			}
 		});
 };
-var _user$project$Main$viewIcelog = function (model) {
-	var icelogIssues = A2(_elm_lang$core$List$map, _user$project$Main$viewIcelogIssue, model.icelog);
+var _husio$scrumboard$View$viewIcelog = function (model) {
+	var icelogIssues = A2(_elm_lang$core$List$map, _husio$scrumboard$View$viewIcelogIssue, model.icelog);
 	return A2(
 		_elm_lang$html$Html$div,
 		{
@@ -12663,17 +11230,17 @@ var _user$project$Main$viewIcelog = function (model) {
 						_elm_lang$html$Html$input,
 						{
 							ctor: '::',
-							_0: _user$project$Extra$onEnter(_user$project$Main$QueryIcelog),
+							_0: _husio$scrumboard$Extra$onEnter(_husio$scrumboard$Model$QueryIcelog),
 							_1: {
 								ctor: '::',
-								_0: _user$project$Extra$onEsc(
-									_user$project$Main$ShowIcelog(false)),
+								_0: _husio$scrumboard$Extra$onEsc(
+									_husio$scrumboard$Model$ShowIcelog(false)),
 								_1: {
 									ctor: '::',
 									_0: _elm_lang$html$Html_Attributes$class('icelog-query'),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$html$Html_Events$onInput(_user$project$Main$IcelogSearchChanged),
+										_0: _elm_lang$html$Html_Events$onInput(_husio$scrumboard$Model$IcelogSearchChanged),
 										_1: {
 											ctor: '::',
 											_0: _elm_lang$html$Html_Attributes$placeholder('Search GitHub issues'),
@@ -12698,7 +11265,7 @@ var _user$project$Main$viewIcelog = function (model) {
 							_elm_lang$html$Html$button,
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$QueryIcelog),
+								_0: _elm_lang$html$Html_Events$onClick(_husio$scrumboard$Model$QueryIcelog),
 								_1: {
 									ctor: '::',
 									_0: _elm_lang$html$Html_Attributes$class('icelog-query-btn'),
@@ -12707,7 +11274,7 @@ var _user$project$Main$viewIcelog = function (model) {
 							},
 							{
 								ctor: '::',
-								_0: _user$project$Main$icon('search'),
+								_0: _husio$scrumboard$View$icon('search'),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
@@ -12757,7 +11324,7 @@ var _user$project$Main$viewIcelog = function (model) {
 										_1: {
 											ctor: '::',
 											_0: _elm_lang$html$Html_Events$onClick(
-												_user$project$Main$ShowIcelog(false)),
+												_husio$scrumboard$Model$ShowIcelog(false)),
 											_1: {
 												ctor: '::',
 												_0: _elm_lang$html$Html_Attributes$title('Hide icelog'),
@@ -12767,7 +11334,7 @@ var _user$project$Main$viewIcelog = function (model) {
 									},
 									{
 										ctor: '::',
-										_0: _user$project$Main$icon('list'),
+										_0: _husio$scrumboard$View$icon('list'),
 										_1: {ctor: '[]'}
 									}),
 								_1: {ctor: '[]'}
@@ -12789,233 +11356,18 @@ var _user$project$Main$viewIcelog = function (model) {
 			}
 		});
 };
-var _user$project$Main$viewCardDrophelper = function (dropId) {
-	var dropAttrs = A2(_norpan$elm_html5_drag_drop$Html5_DragDrop$droppable, _user$project$Main$DragDrop, dropId);
-	var attrs = {
-		ctor: '::',
-		_0: _elm_lang$html$Html_Attributes$class('drop-helper'),
-		_1: dropAttrs
-	};
-	return A2(
-		_elm_lang$html$Html$div,
-		attrs,
-		{ctor: '[]'});
+var _husio$scrumboard$View$isNothing = function (maybe) {
+	var _p4 = maybe;
+	if (_p4.ctor === 'Just') {
+		return false;
+	} else {
+		return true;
+	}
 };
-var _user$project$Main$viewCard = F2(
-	function (dragId, card) {
-		var assignees = A2(_elm_lang$core$List$map, _user$project$Main$viewAssignee, card.issue.assignees);
-		var labels = A2(_elm_lang$core$List$map, _user$project$Main$viewLabel, card.issue.labels);
-		var dropAttrs = A2(
-			_norpan$elm_html5_drag_drop$Html5_DragDrop$droppable,
-			_user$project$Main$DragDrop,
-			_user$project$Main$cardDropId(card));
-		var dragattr = A2(
-			_norpan$elm_html5_drag_drop$Html5_DragDrop$draggable,
-			_user$project$Main$DragDrop,
-			_user$project$Main$cardDragId(card));
-		var placeholderClass = _elm_lang$core$Native_Utils.eq(
-			A2(_elm_lang$core$Maybe$withDefault, _user$project$Main$emptyDraggable, dragId),
-			_user$project$Main$cardDragId(card)) ? _elm_lang$html$Html_Attributes$class('card-placeholder') : _elm_lang$html$Html_Attributes$class('');
-		var attrs = A2(
-			_elm_lang$core$Basics_ops['++'],
-			{
-				ctor: '::',
-				_0: placeholderClass,
-				_1: {
-					ctor: '::',
-					_0: _user$project$Main$cardBorder(card.issue),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('card'),
-						_1: dragattr
-					}
-				}
-			},
-			dropAttrs);
-		return A2(
-			_elm_lang$html$Html$div,
-			attrs,
-			{
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$span,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Events$onClick(
-							_user$project$Main$DelIssueCard(card.issue.id)),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('card-remove'),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$title('Remove from the board'),
-								_1: {ctor: '[]'}
-							}
-						}
-					},
-					{
-						ctor: '::',
-						_0: _user$project$Main$icon('trash-o'),
-						_1: {ctor: '[]'}
-					}),
-				_1: {
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$a,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$title(card.issue.body),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class(
-									A2(_elm_lang$core$Basics_ops['++'], 'card-title state-', card.issue.state)),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$href(card.issue.htmlUrl),
-									_1: {
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$target('_blank'),
-										_1: {ctor: '[]'}
-									}
-								}
-							}
-						},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text(card.issue.title),
-							_1: {ctor: '[]'}
-						}),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$div,
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('card-meta'),
-								_1: {ctor: '[]'}
-							},
-							A2(
-								_elm_lang$core$Basics_ops['++'],
-								labels,
-								{
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$div,
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$class('card-metainfo'),
-											_1: {ctor: '[]'}
-										},
-										assignees),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$div,
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$class('card-metainfo'),
-												_1: {ctor: '[]'}
-											},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text(
-													_user$project$Main$issueLocation(card.issue.url)),
-												_1: {
-													ctor: '::',
-													_0: _user$project$Main$icon('code-fork'),
-													_1: {ctor: '[]'}
-												}
-											}),
-										_1: {
-											ctor: '::',
-											_0: A2(
-												_elm_lang$html$Html$div,
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$class('card-metainfo'),
-													_1: {ctor: '[]'}
-												},
-												{
-													ctor: '::',
-													_0: _elm_lang$html$Html$text(
-														_elm_lang$core$Basics$toString(card.issue.comments)),
-													_1: {
-														ctor: '::',
-														_0: _user$project$Main$icon('comments-o'),
-														_1: {ctor: '[]'}
-													}
-												}),
-											_1: {ctor: '[]'}
-										}
-									}
-								})),
-						_1: {ctor: '[]'}
-					}
-				}
-			});
-	});
-var _user$project$Main$viewCell = F3(
-	function (dragId, cards, dropId) {
-		var afterHelper = _user$project$Main$viewCardDrophelper(
-			A2(_user$project$Main$DroppableID, dropId.position, 1000));
-		var beforeHelper = _user$project$Main$viewCardDrophelper(
-			A2(_user$project$Main$DroppableID, dropId.position, 0));
-		var dropAttr = {ctor: '[]'};
-		var attrs = A2(
-			_elm_lang$core$Basics_ops['++'],
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('board-cell'),
-				_1: {ctor: '[]'}
-			},
-			dropAttr);
-		var contains = A2(_user$project$Main$onlyContained, dropId, cards);
-		var cardViews = A2(
-			_elm_lang$core$List$map,
-			_user$project$Main$viewCard(dragId),
-			contains);
-		return A2(
-			_elm_lang$html$Html$div,
-			attrs,
-			{
-				ctor: '::',
-				_0: beforeHelper,
-				_1: A2(
-					_elm_lang$core$Basics_ops['++'],
-					cardViews,
-					{
-						ctor: '::',
-						_0: afterHelper,
-						_1: {ctor: '[]'}
-					})
-			});
-	});
-var _user$project$Main$viewRow = F3(
-	function (_p18, dragId, cards) {
-		var _p19 = _p18;
-		var droppablePositions = A2(_elm_lang$core$List$range, _p19._0.position, _p19._1.position);
-		var droppableIds = A3(
-			_elm_lang$core$List$map2,
-			_user$project$Main$DroppableID,
-			droppablePositions,
-			A2(_elm_lang$core$List$range, 0, 30));
-		var dropzones = A2(
-			_elm_lang$core$List$map,
-			A2(_user$project$Main$viewCell, dragId, cards),
-			droppableIds);
-		return A2(
-			_elm_lang$html$Html$div,
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('board-row'),
-				_1: {ctor: '[]'}
-			},
-			dropzones);
-	});
-var _user$project$Main$view = function (model) {
+var _husio$scrumboard$View$view = function (model) {
 	var error = function () {
-		var _p20 = model.error;
-		if (_p20.ctor === 'Nothing') {
+		var _p5 = model.error;
+		if (_p5.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$html$Html$div,
 				{ctor: '[]'},
@@ -13037,33 +11389,33 @@ var _user$project$Main$view = function (model) {
 							_0: _elm_lang$html$Html_Attributes$class('pull-right'),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onClick(_user$project$Main$CloseError),
+								_0: _elm_lang$html$Html_Events$onClick(_husio$scrumboard$Model$CloseError),
 								_1: {ctor: '[]'}
 							}
 						},
 						{
 							ctor: '::',
-							_0: _user$project$Main$icon('times'),
+							_0: _husio$scrumboard$View$icon('times'),
 							_1: {ctor: '[]'}
 						}),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$html$Html$text(_p20._0),
+						_0: _elm_lang$html$Html$text(_p5._0),
 						_1: {ctor: '[]'}
 					}
 				});
 		}
 	}();
 	var dragId = _norpan$elm_html5_drag_drop$Html5_DragDrop$getDragId(model.dragDrop);
-	var icelog = (model.showIcelog && _user$project$Main$isNothing(dragId)) ? _user$project$Main$viewIcelog(model) : _elm_lang$html$Html$text('');
-	var clen = _elm_lang$core$List$length(_user$project$Main$columns);
+	var icelog = (model.showIcelog && _husio$scrumboard$View$isNothing(dragId)) ? _husio$scrumboard$View$viewIcelog(model) : _elm_lang$html$Html$text('');
+	var clen = _elm_lang$core$List$length(_husio$scrumboard$Model$columns);
 	var row = function (beginPos) {
 		return A3(
-			_user$project$Main$viewRow,
+			_husio$scrumboard$View$viewRow,
 			{
 				ctor: '_Tuple2',
-				_0: A2(_user$project$Main$DroppableID, clen * beginPos, 0),
-				_1: A2(_user$project$Main$DroppableID, ((clen * beginPos) + clen) - 1, 0)
+				_0: A2(_husio$scrumboard$Model$DroppableID, clen * beginPos, 0),
+				_1: A2(_husio$scrumboard$Model$DroppableID, ((clen * beginPos) + clen) - 1, 0)
 			},
 			dragId,
 			model.cards);
@@ -13093,7 +11445,7 @@ var _user$project$Main$view = function (model) {
 								_1: {
 									ctor: '::',
 									_0: _elm_lang$html$Html_Events$onClick(
-										_user$project$Main$ShowIcelog(!model.showIcelog)),
+										_husio$scrumboard$Model$ShowIcelog(!model.showIcelog)),
 									_1: {
 										ctor: '::',
 										_0: _elm_lang$html$Html_Attributes$title('Toggle icelog'),
@@ -13103,7 +11455,7 @@ var _user$project$Main$view = function (model) {
 							},
 							{
 								ctor: '::',
-								_0: _user$project$Main$icon('list'),
+								_0: _husio$scrumboard$View$icon('list'),
 								_1: {ctor: '[]'}
 							}),
 						_1: {
@@ -13120,7 +11472,7 @@ var _user$project$Main$view = function (model) {
 									},
 									{
 										ctor: '::',
-										_0: _user$project$Main$viewHeaders(_user$project$Main$columns),
+										_0: _husio$scrumboard$View$viewHeaders(_husio$scrumboard$Model$columns),
 										_1: rows
 									}),
 								_1: {ctor: '[]'}
@@ -13151,7 +11503,7 @@ var _user$project$Main$view = function (model) {
 								},
 								{
 									ctor: '::',
-									_0: _user$project$Main$icon('github'),
+									_0: _husio$scrumboard$View$icon('github'),
 									_1: {
 										ctor: '::',
 										_0: _elm_lang$html$Html$text(' source code'),
@@ -13165,8 +11517,42 @@ var _user$project$Main$view = function (model) {
 			}
 		});
 };
-var _user$project$Main$main = _elm_lang$html$Html$programWithFlags(
-	{init: _user$project$Main$init, update: _user$project$Main$update, view: _user$project$Main$view, subscriptions: _user$project$Main$subscriptions})(
+
+var _husio$scrumboard$Main$subscriptions = function (model) {
+	return A2(_elm_lang$websocket$WebSocket$listen, model.flags.websocketAddress, _husio$scrumboard$Model$WsMessage);
+};
+var _husio$scrumboard$Main$init = function (flags) {
+	var fetchIcelog = A2(_husio$scrumboard$GitHub$fetchIssues, flags.githubToken, _husio$scrumboard$Model$IcelogFetched);
+	var fetchReposCmd = A2(_husio$scrumboard$GitHub$fetchUserRepos, flags.githubToken, _husio$scrumboard$Model$RepositoriesFetched);
+	var model = {
+		cards: {ctor: '[]'},
+		dragDrop: _norpan$elm_html5_drag_drop$Html5_DragDrop$init,
+		rows: 3,
+		icelog: {ctor: '[]'},
+		icelogQuery: '',
+		showIcelog: false,
+		error: _elm_lang$core$Maybe$Nothing,
+		flags: flags,
+		githubOrg: '',
+		repositories: {ctor: '[]'}
+	};
+	return {
+		ctor: '_Tuple2',
+		_0: model,
+		_1: _elm_lang$core$Platform_Cmd$batch(
+			{
+				ctor: '::',
+				_0: fetchReposCmd,
+				_1: {
+					ctor: '::',
+					_0: fetchIcelog,
+					_1: {ctor: '[]'}
+				}
+			})
+	};
+};
+var _husio$scrumboard$Main$main = _elm_lang$html$Html$programWithFlags(
+	{init: _husio$scrumboard$Main$init, update: _husio$scrumboard$Update$update, view: _husio$scrumboard$View$view, subscriptions: _husio$scrumboard$Main$subscriptions})(
 	A2(
 		_elm_lang$core$Json_Decode$andThen,
 		function (githubToken) {
@@ -13182,8 +11568,8 @@ var _user$project$Main$main = _elm_lang$html$Html$programWithFlags(
 
 var Elm = {};
 Elm['Main'] = Elm['Main'] || {};
-if (typeof _user$project$Main$main !== 'undefined') {
-    _user$project$Main$main(Elm['Main'], 'Main', undefined);
+if (typeof _husio$scrumboard$Main$main !== 'undefined') {
+    _husio$scrumboard$Main$main(Elm['Main'], 'Main', undefined);
 }
 
 if (typeof define === "function" && define['amd'])
