@@ -10410,7 +10410,7 @@ var _husio$scrumboard$Update$tidyCards = function (cards) {
 	return A3(_elm_lang$core$List$map2, reorder, orders, sorted);
 };
 var _husio$scrumboard$Update$adjustRowNumber = function (model) {
-	var colnum = _elm_lang$core$Basics$toFloat(
+	var colnums = _elm_lang$core$Basics$toFloat(
 		_elm_lang$core$List$length(_husio$scrumboard$Model$columns));
 	var maxrow = _elm_lang$core$Basics$toFloat(
 		A2(
@@ -10423,7 +10423,7 @@ var _husio$scrumboard$Update$adjustRowNumber = function (model) {
 						return _.position;
 					},
 					model.cards))));
-	var needrows = _elm_lang$core$Basics$ceiling(maxrow / colnum);
+	var needrows = _elm_lang$core$Basics$ceiling((maxrow + 1) / colnums);
 	return _elm_lang$core$Native_Utils.update(
 		model,
 		{rows: needrows + 1});

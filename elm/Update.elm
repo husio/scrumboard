@@ -174,14 +174,12 @@ adjustRowNumber model =
                 |> Maybe.withDefault 0
                 |> toFloat
 
-        colnum : Float
-        colnum =
-            List.length columns
-                |> toFloat
+        colnums =
+            toFloat (List.length columns)
 
         needrows : Int
         needrows =
-            ceiling (maxrow / colnum)
+            ceiling ((maxrow + 1) / colnums)
     in
         { model | rows = needrows + 1 }
 
