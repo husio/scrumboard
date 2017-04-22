@@ -4,11 +4,13 @@ app.js:
 
 app.min.js: app.js
 	cd dist; \
-	uglify -s dist/app.js -o dist/app.min.js
+	rm -f app.min.js; \
+	uglify -s app.js -o app.min.js
 
 app.min.css:
 	cd dist; \
-	uglify -s dist/app.css -o dist/app.min.css
+	rm -f app.min.css; \
+	uglify -c -s app.css -o app.min.css
 
 dist: app.min.js app.min.css
 
