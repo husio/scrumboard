@@ -12,7 +12,7 @@ import (
 func (app *ScrumBoardApp) handleClient(w http.ResponseWriter, r *http.Request) {
 	boardID := surf.PathArg(r, 0)
 
-	if len(boardID) != 40 {
+	if ln := len(boardID); ln < 20 || ln > 60 {
 		surf.JSONErr(w, http.StatusBadRequest, "invalid board id")
 		return
 	}
