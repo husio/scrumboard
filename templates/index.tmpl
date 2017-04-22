@@ -11,9 +11,37 @@
  </head>
   <body>
     <div class="board-list">
-      <a class="pull-right" href="/logout">Logout</a>
+      <div class="pull-right">
+        Logged as <em>{{.Account.Name}}</em>.
+        <a href="/logout">Logout</a>.
+      </div>
+
       <h1>Available scrum boards</h1>
-      <a href="/b/b685c036049f6c2f35cc1b03af6815b352b8557e">Demo Scrum Board</a>
+      <ul>
+        <li>
+          Visible to everyone <a href="/b/b685c036049f6c2f35cc1b03af6815b352b8557e">demo Scrum Board</a>
+          <i class="fa fa-users" aria-hidden="true"></i>
+        </li>
+        {{range .Boards}}
+          <li>
+            <a href="/b/{{.ID}}">{{.Name}}</a>
+          </li>
+        {{end}}
+      </ul>
+
+
+      <h1>Create new board</h1>
+      <form action="/new" method="POST">
+        <input name="name" type="text" required placeholder="Board name" minlength="2" maxlength="120">
+        <button type="submit">Create new Board</button>
+      </form>
+    </div>
+
+    <div class="footer">
+      <a href="https://github.com/husio/scrumboard" target="_blank">
+        <i class="fa fa-github" aria-hidden="true"></i>
+        source code
+      </a>
     </div>
   </body>
 </html>

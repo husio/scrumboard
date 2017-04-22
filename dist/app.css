@@ -1,6 +1,7 @@
 body, html {
 	margin: 0;
 	padding: 0;
+	color: #383838;
 }
 
 body {
@@ -10,7 +11,7 @@ body {
 }
 
 a {
-	color: #002E8D;
+	color: #0057E7;
 	text-decoration: none;
 }
 

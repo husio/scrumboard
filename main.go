@@ -34,17 +34,18 @@ func main() {
 
 	html := surf.LoadTemplates(templatesPath)
 	html.Debug = debug
-
+	boardStore := scrumboard.NewRedisBoardStore(redisPool)
 	providers := []auth.Provider{
 		auth.GithubProvider(!debug, githubClientId, githubSecret),
 	}
 	cache := cache.NewRedisCache(redisPool)
 	authApp := auth.NewApp(cache, html, providers, debug)
 	hub := pubsub.Snapshot(redisPool, pubsub.NewMemoryHub())
-	scrumBoardApp := scrumboard.NewApp(html, authApp, hub, debug)
+	scrumBoardApp := scrumboard.NewApp(html, authApp, boardStore, hub, debug)
 
 	rt := surf.NewRouter()
 	rt.Get(`/`, scrumBoardApp)
+	rt.Any(`/new`, scrumBoardApp)
 	rt.Get(`/ws/.*`, scrumBoardApp)
 	rt.Get(`/b/.*`, scrumBoardApp)
 	rt.Get(`/login`, authApp)

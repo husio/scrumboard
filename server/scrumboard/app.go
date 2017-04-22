@@ -16,6 +16,7 @@ type ScrumBoardApp struct {
 	log   surf.Logger
 	hub   pubsub.Hub
 	auth  Authenticator
+	bs    BoardStore
 }
 
 type Authenticator interface {
@@ -25,6 +26,7 @@ type Authenticator interface {
 func NewApp(
 	html surf.Renderer,
 	auth Authenticator,
+	bs BoardStore,
 	hub pubsub.Hub,
 	debug bool,
 ) *ScrumBoardApp {
@@ -34,10 +36,12 @@ func NewApp(
 		auth:  auth,
 		hub:   hub,
 		debug: debug,
+		bs:    bs,
 	}
 
 	rt := surf.NewRouter()
 	rt.Get(`/`, app.index)
+	rt.Post(`/new`, app.newBoard)
 	rt.Get(`/b/<board-id>`, app.board)
 	rt.Get(`/ws/<board-id>`, app.handleClient)
 	app.mux = rt
