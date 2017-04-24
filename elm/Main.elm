@@ -31,7 +31,6 @@ init flags =
             , showIcelog = False
             , error = Nothing
             , flags = flags
-            , githubOrg = ""
             , repositories = []
             }
 

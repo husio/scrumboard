@@ -21,9 +21,6 @@ update msg model =
         RepositoriesFetched (Err msg) ->
             ( { model | error = Just (toString msg) }, Cmd.none )
 
-        GithubOwnerSelected name ->
-            ( { model | githubOrg = name }, Cmd.none )
-
         WsMessage content ->
             case Json.Decode.decodeString decodeState content of
                 Err msg ->

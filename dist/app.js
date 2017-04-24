@@ -10248,27 +10248,10 @@ var _husio$scrumboard$Model$DroppableID = F2(
 	function (a, b) {
 		return {position: a, order: b};
 	});
-var _husio$scrumboard$Model$Model = function (a) {
-	return function (b) {
-		return function (c) {
-			return function (d) {
-				return function (e) {
-					return function (f) {
-						return function (g) {
-							return function (h) {
-								return function (i) {
-									return function (j) {
-										return {cards: a, dragDrop: b, rows: c, icelog: d, icelogQuery: e, showIcelog: f, error: g, flags: h, githubOrg: i, repositories: j};
-									};
-								};
-							};
-						};
-					};
-				};
-			};
-		};
-	};
-};
+var _husio$scrumboard$Model$Model = F9(
+	function (a, b, c, d, e, f, g, h, i) {
+		return {cards: a, dragDrop: b, rows: c, icelog: d, icelogQuery: e, showIcelog: f, error: g, flags: h, repositories: i};
+	});
 var _husio$scrumboard$Model$Card = F3(
 	function (a, b, c) {
 		return {position: a, order: b, issue: c};
@@ -10310,9 +10293,6 @@ var _husio$scrumboard$Model$IcelogSearchChanged = function (a) {
 	return {ctor: 'IcelogSearchChanged', _0: a};
 };
 var _husio$scrumboard$Model$QueryIcelog = {ctor: 'QueryIcelog'};
-var _husio$scrumboard$Model$GithubOwnerSelected = function (a) {
-	return {ctor: 'GithubOwnerSelected', _0: a};
-};
 var _husio$scrumboard$Model$RepositoriesFetched = function (a) {
 	return {ctor: 'RepositoriesFetched', _0: a};
 };
@@ -10461,14 +10441,6 @@ var _husio$scrumboard$Update$update = F2(
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				}
-			case 'GithubOwnerSelected':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{githubOrg: _p0._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
 			case 'WsMessage':
 				var _p1 = A2(_elm_lang$core$Json_Decode$decodeString, _husio$scrumboard$Model$decodeState, _p0._0);
 				if (_p1.ctor === 'Err') {
@@ -11533,7 +11505,6 @@ var _husio$scrumboard$Main$init = function (flags) {
 		showIcelog: false,
 		error: _elm_lang$core$Maybe$Nothing,
 		flags: flags,
-		githubOrg: '',
 		repositories: {ctor: '[]'}
 	};
 	return {

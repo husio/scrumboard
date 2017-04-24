@@ -13,7 +13,6 @@ type Msg
     | IssueFetched DroppableID (Result Http.Error GitHub.Issue)
     | IssueRefreshed DroppableID (Result Http.Error GitHub.Issue)
     | RepositoriesFetched (Result Http.Error (List GitHub.Repository))
-    | GithubOwnerSelected String
     | QueryIcelog
     | IcelogSearchChanged String
     | IcelogFetched (Result Http.Error (List GitHub.Issue))
@@ -64,7 +63,6 @@ type alias Model =
     , showIcelog : Bool
     , error : Maybe String
     , flags : ProgramFlags
-    , githubOrg : String
     , repositories : List GitHub.Repository
     }
 
