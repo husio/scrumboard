@@ -23,7 +23,7 @@ Run Go server (`make devserver` requires
     DEBUG=true STATIC=./dist go run main.go
 
 
-Go to http://scrumboard.dev:8080
+Go to http://scrumboard.dev:8000
 
 
 
