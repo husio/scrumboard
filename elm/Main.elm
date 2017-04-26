@@ -28,6 +28,7 @@ init flags =
             , rows = 3
             , icelog = []
             , icelogQuery = ""
+            , icelogFetching = False
             , showIcelog = False
             , error = Nothing
             , flags = flags

@@ -9789,21 +9789,21 @@ var _elm_lang$websocket$WebSocket$onSelfMsg = F3(
 	});
 _elm_lang$core$Native_Platform.effectManagers['WebSocket'] = {pkg: 'elm-lang/websocket', init: _elm_lang$websocket$WebSocket$init, onEffects: _elm_lang$websocket$WebSocket$onEffects, onSelfMsg: _elm_lang$websocket$WebSocket$onSelfMsg, tag: 'fx', cmdMap: _elm_lang$websocket$WebSocket$cmdMap, subMap: _elm_lang$websocket$WebSocket$subMap};
 
-var _husio$scrumboard$Extra$onKeyPressed = F2(
-	function (key, cmd) {
+var _husio$scrumboard$Extra$onEvent = F3(
+	function (event, key, cmd) {
 		var isKey = function (code) {
 			return _elm_lang$core$Native_Utils.eq(code, key) ? _elm_lang$core$Json_Decode$succeed(cmd) : _elm_lang$core$Json_Decode$fail('');
 		};
 		return A2(
 			_elm_lang$html$Html_Events$on,
-			'keydown',
+			event,
 			A2(_elm_lang$core$Json_Decode$andThen, isKey, _elm_lang$html$Html_Events$keyCode));
 	});
 var _husio$scrumboard$Extra$onEsc = function (msg) {
-	return A2(_husio$scrumboard$Extra$onKeyPressed, 27, msg);
+	return A3(_husio$scrumboard$Extra$onEvent, 'keypress', 27, msg);
 };
 var _husio$scrumboard$Extra$onEnter = function (msg) {
-	return A2(_husio$scrumboard$Extra$onKeyPressed, 13, msg);
+	return A3(_husio$scrumboard$Extra$onEvent, 'keydown', 13, msg);
 };
 
 var _husio$scrumboard$GitHub$Repository = F4(
@@ -10248,10 +10248,27 @@ var _husio$scrumboard$Model$DroppableID = F2(
 	function (a, b) {
 		return {position: a, order: b};
 	});
-var _husio$scrumboard$Model$Model = F9(
-	function (a, b, c, d, e, f, g, h, i) {
-		return {cards: a, dragDrop: b, rows: c, icelog: d, icelogQuery: e, showIcelog: f, error: g, flags: h, repositories: i};
-	});
+var _husio$scrumboard$Model$Model = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return {cards: a, dragDrop: b, rows: c, icelog: d, icelogQuery: e, icelogFetching: f, showIcelog: g, error: h, flags: i, repositories: j};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
 var _husio$scrumboard$Model$Card = F3(
 	function (a, b, c) {
 		return {position: a, order: b, issue: c};
@@ -10509,7 +10526,9 @@ var _husio$scrumboard$Update$update = F2(
 			case 'QueryIcelog':
 				return {
 					ctor: '_Tuple2',
-					_0: model,
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{icelogFetching: true}),
 					_1: A3(_husio$scrumboard$GitHub$searchIssues, model.flags.githubToken, model.icelogQuery, _husio$scrumboard$Model$IcelogFetched)
 				};
 			case 'IcelogSearchChanged':
@@ -10568,7 +10587,7 @@ var _husio$scrumboard$Update$update = F2(
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
-							{icelog: _p0._0._0}),
+							{icelog: _p0._0._0, icelogFetching: false}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
@@ -10578,7 +10597,8 @@ var _husio$scrumboard$Update$update = F2(
 							model,
 							{
 								error: _elm_lang$core$Maybe$Just(
-									_elm_lang$core$Basics$toString(_p0._0._0))
+									_elm_lang$core$Basics$toString(_p0._0._0)),
+								icelogFetching: false
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
@@ -11179,6 +11199,10 @@ var _husio$scrumboard$View$viewIcelogIssue = function (issue) {
 		});
 };
 var _husio$scrumboard$View$viewIcelog = function (model) {
+	var ifFetching = F2(
+		function (yes, no) {
+			return model.icelogFetching ? yes : no;
+		});
 	var boardIssues = A2(
 		_elm_lang$core$List$map,
 		function (c) {
@@ -11235,11 +11259,16 @@ var _husio$scrumboard$View$viewIcelog = function (model) {
 											_0: _elm_lang$html$Html_Attributes$placeholder('Search GitHub issues'),
 											_1: {
 												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$value(model.icelogQuery),
+												_0: _elm_lang$html$Html_Attributes$value(
+													A2(ifFetching, 'feching issues...', model.icelogQuery)),
 												_1: {
 													ctor: '::',
 													_0: _elm_lang$html$Html_Attributes$autofocus(true),
-													_1: {ctor: '[]'}
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html_Attributes$disabled(model.icelogFetching),
+														_1: {ctor: '[]'}
+													}
 												}
 											}
 										}
@@ -11258,7 +11287,11 @@ var _husio$scrumboard$View$viewIcelog = function (model) {
 								_1: {
 									ctor: '::',
 									_0: _elm_lang$html$Html_Attributes$class('icelog-query-btn'),
-									_1: {ctor: '[]'}
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$disabled(model.icelogFetching),
+										_1: {ctor: '[]'}
+									}
 								}
 							},
 							{
@@ -11519,6 +11552,7 @@ var _husio$scrumboard$Main$init = function (flags) {
 		rows: 3,
 		icelog: {ctor: '[]'},
 		icelogQuery: '',
+		icelogFetching: false,
 		showIcelog: false,
 		error: _elm_lang$core$Maybe$Nothing,
 		flags: flags,

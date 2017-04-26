@@ -72,7 +72,7 @@ update msg model =
                 ( m, sendStateSync m )
 
         QueryIcelog ->
-            ( model, GitHub.searchIssues model.flags.githubToken model.icelogQuery IcelogFetched )
+            ( { model | icelogFetching = True }, GitHub.searchIssues model.flags.githubToken model.icelogQuery IcelogFetched )
 
         IcelogSearchChanged query ->
             ( { model | icelogQuery = query }, Cmd.none )
@@ -81,10 +81,10 @@ update msg model =
             ( { model | error = Just (toString msg) }, Cmd.none )
 
         IcelogFetched (Ok issues) ->
-            ( { model | icelog = issues }, Cmd.none )
+            ( { model | icelog = issues, icelogFetching = False }, Cmd.none )
 
         IcelogFetched (Err msg) ->
-            ( { model | error = Just (toString msg) }, Cmd.none )
+            ( { model | error = Just (toString msg), icelogFetching = False }, Cmd.none )
 
         ShowIcelog show ->
             ( { model | showIcelog = show }, Cmd.none )

@@ -60,6 +60,7 @@ type alias Model =
     , rows : Int
     , icelog : List GitHub.Issue
     , icelogQuery : String
+    , icelogFetching : Bool
     , showIcelog : Bool
     , error : Maybe String
     , flags : ProgramFlags

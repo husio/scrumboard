@@ -86,6 +86,13 @@ viewIcelog model =
         icelogIssues =
             filterOutDisplayed model.icelog
                 |> List.map viewIcelogIssue
+
+        ifFetching : String -> String -> String
+        ifFetching yes no =
+            if model.icelogFetching then
+                yes
+            else
+                no
     in
         div [ class "icelog-sidebar" ]
             [ div [ class "icelog-toolbar" ]
@@ -95,13 +102,15 @@ viewIcelog model =
                     , class "icelog-query"
                     , onInput IcelogSearchChanged
                     , placeholder "Search GitHub issues"
-                    , value model.icelogQuery
+                    , value (ifFetching "feching issues..." model.icelogQuery)
                     , autofocus True
+                    , disabled model.icelogFetching
                     ]
                     []
                 , button
                     [ onClick QueryIcelog
                     , class "icelog-query-btn"
+                    , disabled model.icelogFetching
                     ]
                     [ icon "search" ]
                 , p [ class "icelog-toolbar-help" ]

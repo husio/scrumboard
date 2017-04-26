@@ -7,16 +7,16 @@ import Json.Decode
 
 onEnter : msg -> Attribute msg
 onEnter msg =
-    onKeyPressed 13 msg
+    onEvent "keydown" 13 msg
 
 
 onEsc : msg -> Attribute msg
 onEsc msg =
-    onKeyPressed 27 msg
+    onEvent "keypress" 27 msg
 
 
-onKeyPressed : Int -> msg -> Attribute msg
-onKeyPressed key cmd =
+onEvent : String -> Int -> msg -> Attribute msg
+onEvent event key cmd =
     let
         isKey code =
             if code == key then
@@ -24,4 +24,4 @@ onKeyPressed key cmd =
             else
                 Json.Decode.fail ""
     in
-        on "keydown" (Json.Decode.andThen isKey keyCode)
+        on event (Json.Decode.andThen isKey keyCode)
