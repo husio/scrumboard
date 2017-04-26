@@ -18,12 +18,12 @@
 
       <h1>Available scrum boards</h1>
       <ul>
-        <li>
+        <li class="board-link">
           Visible to everyone <a href="/b/b685c036049f6c2f35cc1b03af6815b352b8557e">demo Scrum Board</a>
           <i class="fa fa-users" aria-hidden="true"></i>
         </li>
         {{range .Boards}}
-          <li>
+          <li class="board-link">
             <a href="/b/{{.ID}}">{{.Name}}</a>
           </li>
         {{end}}

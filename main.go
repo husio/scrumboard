@@ -32,6 +32,12 @@ func main() {
 		Dial:        func() (redis.Conn, error) { return redis.DialURL(redisUrl) },
 	}
 
+	rc := redisPool.Get()
+	defer rc.Close()
+	if _, err := rc.Do("PING"); err != nil {
+		log.Fatalf("cannot ping redis server: %s", err)
+	}
+
 	html := surf.LoadTemplates(templatesPath)
 	html.Debug = debug
 	boardStore := scrumboard.NewRedisBoardStore(redisPool)

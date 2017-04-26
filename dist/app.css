@@ -242,6 +242,11 @@ a {
 	border: 1px solid #DEDEDE;
 }
 
+.board-link {
+	padding: 5px 0;
+	font-size: 18px;
+}
+
 
 /* login */
 .login-card {

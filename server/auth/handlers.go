@@ -81,9 +81,9 @@ func (app *AuthApp) loginOAuth2(w http.ResponseWriter, r *http.Request) {
 		Next:     r.FormValue("next"),
 	}, 5*time.Minute)
 	if err != nil {
-		app.log.Info(ctx, "data not found in cache",
+		app.log.Info(ctx, "cannot set login data",
 			"error", err.Error())
-		app.html.RenderDefault(w, http.StatusBadRequest)
+		app.html.RenderDefault(w, http.StatusInternalServerError)
 		return
 	}
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
