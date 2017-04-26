@@ -9789,22 +9789,28 @@ var _elm_lang$websocket$WebSocket$onSelfMsg = F3(
 	});
 _elm_lang$core$Native_Platform.effectManagers['WebSocket'] = {pkg: 'elm-lang/websocket', init: _elm_lang$websocket$WebSocket$init, onEffects: _elm_lang$websocket$WebSocket$onEffects, onSelfMsg: _elm_lang$websocket$WebSocket$onSelfMsg, tag: 'fx', cmdMap: _elm_lang$websocket$WebSocket$cmdMap, subMap: _elm_lang$websocket$WebSocket$subMap};
 
-var _husio$scrumboard$Extra$onEvent = F3(
-	function (event, key, cmd) {
-		var isKey = function (code) {
-			return _elm_lang$core$Native_Utils.eq(code, key) ? _elm_lang$core$Json_Decode$succeed(cmd) : _elm_lang$core$Json_Decode$fail('');
-		};
-		return A2(
-			_elm_lang$html$Html_Events$on,
-			event,
-			A2(_elm_lang$core$Json_Decode$andThen, isKey, _elm_lang$html$Html_Events$keyCode));
-	});
-var _husio$scrumboard$Extra$onEsc = function (msg) {
-	return A3(_husio$scrumboard$Extra$onEvent, 'keypress', 27, msg);
+var _husio$scrumboard$Extra$onKeyDown = function (mapping) {
+	var isKey = F2(
+		function (_p0, code) {
+			var _p1 = _p0;
+			return _elm_lang$core$Native_Utils.eq(code, _p1._0) ? _elm_lang$core$Json_Decode$succeed(_p1._1) : _elm_lang$core$Json_Decode$fail('');
+		});
+	var isMappedKey = function (code) {
+		return _elm_lang$core$Json_Decode$oneOf(
+			A2(
+				_elm_lang$core$List$map,
+				function (x) {
+					return x(code);
+				},
+				A2(_elm_lang$core$List$map, isKey, mapping)));
+	};
+	return A2(
+		_elm_lang$html$Html_Events$on,
+		'keydown',
+		A2(_elm_lang$core$Json_Decode$andThen, isMappedKey, _elm_lang$html$Html_Events$keyCode));
 };
-var _husio$scrumboard$Extra$onEnter = function (msg) {
-	return A3(_husio$scrumboard$Extra$onEvent, 'keydown', 13, msg);
-};
+var _husio$scrumboard$Extra$keyEsc = 27;
+var _husio$scrumboard$Extra$keyEnter = 13;
 
 var _husio$scrumboard$GitHub$Repository = F4(
 	function (a, b, c, d) {
@@ -11243,32 +11249,40 @@ var _husio$scrumboard$View$viewIcelog = function (model) {
 						_elm_lang$html$Html$input,
 						{
 							ctor: '::',
-							_0: _husio$scrumboard$Extra$onEnter(_husio$scrumboard$Model$QueryIcelog),
-							_1: {
-								ctor: '::',
-								_0: _husio$scrumboard$Extra$onEsc(
-									_husio$scrumboard$Model$ShowIcelog(false)),
-								_1: {
+							_0: _husio$scrumboard$Extra$onKeyDown(
+								{
 									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('icelog-query'),
+									_0: {ctor: '_Tuple2', _0: _husio$scrumboard$Extra$keyEnter, _1: _husio$scrumboard$Model$QueryIcelog},
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$html$Html_Events$onInput(_husio$scrumboard$Model$IcelogSearchChanged),
+										_0: {
+											ctor: '_Tuple2',
+											_0: _husio$scrumboard$Extra$keyEsc,
+											_1: _husio$scrumboard$Model$ShowIcelog(false)
+										},
+										_1: {ctor: '[]'}
+									}
+								}),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('icelog-query'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onInput(_husio$scrumboard$Model$IcelogSearchChanged),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$placeholder('Search GitHub issues'),
 										_1: {
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$placeholder('Search GitHub issues'),
+											_0: _elm_lang$html$Html_Attributes$value(
+												A2(ifFetching, 'feching issues...', model.icelogQuery)),
 											_1: {
 												ctor: '::',
-												_0: _elm_lang$html$Html_Attributes$value(
-													A2(ifFetching, 'feching issues...', model.icelogQuery)),
+												_0: _elm_lang$html$Html_Attributes$autofocus(true),
 												_1: {
 													ctor: '::',
-													_0: _elm_lang$html$Html_Attributes$autofocus(true),
-													_1: {
-														ctor: '::',
-														_0: _elm_lang$html$Html_Attributes$disabled(model.icelogFetching),
-														_1: {ctor: '[]'}
-													}
+													_0: _elm_lang$html$Html_Attributes$disabled(model.icelogFetching),
+													_1: {ctor: '[]'}
 												}
 											}
 										}

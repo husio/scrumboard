@@ -97,8 +97,10 @@ viewIcelog model =
         div [ class "icelog-sidebar" ]
             [ div [ class "icelog-toolbar" ]
                 [ input
-                    [ Extra.onEnter QueryIcelog
-                    , Extra.onEsc (ShowIcelog False)
+                    [ Extra.onKeyDown
+                        [ ( Extra.keyEnter, QueryIcelog )
+                        , ( Extra.keyEsc, (ShowIcelog False) )
+                        ]
                     , class "icelog-query"
                     , onInput IcelogSearchChanged
                     , placeholder "Search GitHub issues"

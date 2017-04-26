@@ -5,23 +5,30 @@ import Html.Events exposing (..)
 import Json.Decode
 
 
-onEnter : msg -> Attribute msg
-onEnter msg =
-    onEvent "keydown" 13 msg
+keyEnter : number
+keyEnter =
+    13
 
 
-onEsc : msg -> Attribute msg
-onEsc msg =
-    onEvent "keypress" 27 msg
+keyEsc : number
+keyEsc =
+    27
 
 
-onEvent : String -> Int -> msg -> Attribute msg
-onEvent event key cmd =
+onKeyDown : List ( Int, msg ) -> Attribute msg
+onKeyDown mapping =
     let
-        isKey code =
+        isKey : ( Int, msg ) -> Int -> Json.Decode.Decoder msg
+        isKey ( key, cmd ) code =
             if code == key then
                 Json.Decode.succeed cmd
             else
                 Json.Decode.fail ""
+
+        isMappedKey : Int -> Json.Decode.Decoder msg
+        isMappedKey code =
+            List.map isKey mapping
+                |> List.map (\x -> x code)
+                |> Json.Decode.oneOf
     in
-        on event (Json.Decode.andThen isKey keyCode)
+        on "keydown" (Json.Decode.andThen isMappedKey keyCode)
