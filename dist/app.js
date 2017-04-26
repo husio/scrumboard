@@ -11179,7 +11179,24 @@ var _husio$scrumboard$View$viewIcelogIssue = function (issue) {
 		});
 };
 var _husio$scrumboard$View$viewIcelog = function (model) {
-	var icelogIssues = A2(_elm_lang$core$List$map, _husio$scrumboard$View$viewIcelogIssue, model.icelog);
+	var boardIssues = A2(
+		_elm_lang$core$List$map,
+		function (c) {
+			return c.issue.id;
+		},
+		model.cards);
+	var filterOutDisplayed = function (icelog) {
+		return A2(
+			_elm_lang$core$List$filter,
+			function (i) {
+				return !A2(_elm_lang$core$List$member, i.id, boardIssues);
+			},
+			icelog);
+	};
+	var icelogIssues = A2(
+		_elm_lang$core$List$map,
+		_husio$scrumboard$View$viewIcelogIssue,
+		filterOutDisplayed(model.icelog));
 	return A2(
 		_elm_lang$html$Html$div,
 		{

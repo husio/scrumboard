@@ -75,8 +75,17 @@ isNothing maybe =
 viewIcelog : Model -> Html Msg
 viewIcelog model =
     let
+        boardIssues =
+            List.map (\c -> c.issue.id) model.cards
+
+        -- remove those issues that are already present on the board - no need to show them on in the icelog
+        filterOutDisplayed : List GitHub.Issue -> List GitHub.Issue
+        filterOutDisplayed icelog =
+            List.filter (\i -> not (List.member i.id boardIssues)) icelog
+
         icelogIssues =
-            List.map viewIcelogIssue model.icelog
+            filterOutDisplayed model.icelog
+                |> List.map viewIcelogIssue
     in
         div [ class "icelog-sidebar" ]
             [ div [ class "icelog-toolbar" ]
