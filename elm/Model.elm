@@ -10,6 +10,8 @@ import Json.Encode
 type Msg
     = DragDrop (DragDrop.Msg DraggableID DroppableID)
     | DelIssueCard Int
+    | DelIssueCardConfirm Int
+    | DelIssueCardCancel Int
     | IssueFetched DroppableID (Result Http.Error GitHub.Issue)
     | IssueRefreshed DroppableID (Result Http.Error GitHub.Issue)
     | RepositoriesFetched (Result Http.Error (List GitHub.Repository))
@@ -72,6 +74,7 @@ type alias Card =
     { position : Int
     , order : Int
     , issue : GitHub.Issue
+    , askDelete : Bool
     }
 
 

@@ -267,14 +267,33 @@ viewCard dragId card =
 
         assignees =
             List.map viewAssignee card.issue.assignees
+
+        cardRemove =
+            if card.askDelete then
+                span [ class "card-remove" ]
+                    [ span
+                        [ class "card-remove-yes"
+                        , onClick (DelIssueCardConfirm card.issue.id)
+                        , title "Confirm and remove from the board"
+                        ]
+                        [ icon "trash-o" ]
+                    , span
+                        [ class "card-remove-no"
+                        , onClick (DelIssueCardCancel card.issue.id)
+                        , title "Cancel removing from the board"
+                        ]
+                        [ icon "ban" ]
+                    ]
+            else
+                span
+                    [ onClick (DelIssueCard card.issue.id)
+                    , class "card-remove"
+                    , title "Remove from the board"
+                    ]
+                    [ icon "trash-o" ]
     in
         div attrs
-            [ span
-                [ onClick (DelIssueCard card.issue.id)
-                , class "card-remove"
-                , title "Remove from the board"
-                ]
-                [ icon "trash-o" ]
+            [ cardRemove
             , a
                 [ title card.issue.body
                 , class ("card-title state-" ++ card.issue.state)

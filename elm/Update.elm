@@ -58,7 +58,7 @@ update msg model =
         IssueFetched position (Ok issue) ->
             let
                 card =
-                    Card position.position position.order issue
+                    Card position.position position.order issue False
 
                 withoutFetched =
                     List.filter (\c -> c.issue.id /= issue.id) model.cards
@@ -92,7 +92,7 @@ update msg model =
         IssueRefreshed position (Ok issue) ->
             let
                 card =
-                    Card position.position position.order issue
+                    Card position.position position.order issue False
 
                 withoutFetched =
                     List.filter (\c -> c.issue.id /= issue.id) model.cards
@@ -150,6 +150,19 @@ update msg model =
 
         DelIssueCard issueId ->
             let
+                setAskDelete c =
+                    if c.issue.id == issueId then
+                        { c | askDelete = True }
+                    else
+                        { c | askDelete = False }
+
+                cards =
+                    List.map setAskDelete model.cards
+            in
+                ( { model | cards = cards }, Cmd.none )
+
+        DelIssueCardConfirm issueId ->
+            let
                 cards =
                     List.filter (\c -> c.issue.id /= issueId) model.cards
 
@@ -157,6 +170,13 @@ update msg model =
                     adjustRowNumber { model | cards = cards }
             in
                 ( m, sendStateSync m )
+
+        DelIssueCardCancel issueId ->
+            let
+                cards =
+                    List.map (\c -> { c | askDelete = False }) model.cards
+            in
+                ( { model | cards = cards }, Cmd.none )
 
 
 adjustRowNumber : Model -> Model

@@ -10275,9 +10275,9 @@ var _husio$scrumboard$Model$Model = function (a) {
 		};
 	};
 };
-var _husio$scrumboard$Model$Card = F3(
-	function (a, b, c) {
-		return {position: a, order: b, issue: c};
+var _husio$scrumboard$Model$Card = F4(
+	function (a, b, c, d) {
+		return {position: a, order: b, issue: c, askDelete: d};
 	});
 var _husio$scrumboard$Model$State = F2(
 	function (a, b) {
@@ -10327,6 +10327,12 @@ var _husio$scrumboard$Model$IssueFetched = F2(
 	function (a, b) {
 		return {ctor: 'IssueFetched', _0: a, _1: b};
 	});
+var _husio$scrumboard$Model$DelIssueCardCancel = function (a) {
+	return {ctor: 'DelIssueCardCancel', _0: a};
+};
+var _husio$scrumboard$Model$DelIssueCardConfirm = function (a) {
+	return {ctor: 'DelIssueCardConfirm', _0: a};
+};
 var _husio$scrumboard$Model$DelIssueCard = function (a) {
 	return {ctor: 'DelIssueCard', _0: a};
 };
@@ -10555,7 +10561,7 @@ var _husio$scrumboard$Update$update = F2(
 							return !_elm_lang$core$Native_Utils.eq(c.issue.id, _p5.id);
 						},
 						model.cards);
-					var card = A3(_husio$scrumboard$Model$Card, _p6.position, _p6.order, _p5);
+					var card = A4(_husio$scrumboard$Model$Card, _p6.position, _p6.order, _p5, false);
 					var cards = A2(
 						_elm_lang$core$Basics_ops['++'],
 						withoutFetched,
@@ -10627,7 +10633,7 @@ var _husio$scrumboard$Update$update = F2(
 							return !_elm_lang$core$Native_Utils.eq(c.issue.id, _p7.id);
 						},
 						model.cards);
-					var card = A3(_husio$scrumboard$Model$Card, _p8.position, _p8.order, _p7);
+					var card = A4(_husio$scrumboard$Model$Card, _p8.position, _p8.order, _p7, false);
 					var cards = A2(
 						_elm_lang$core$Basics_ops['++'],
 						withoutFetched,
@@ -10699,7 +10705,23 @@ var _husio$scrumboard$Update$update = F2(
 							}
 						})
 				};
-			default:
+			case 'DelIssueCard':
+				var setAskDelete = function (c) {
+					return _elm_lang$core$Native_Utils.eq(c.issue.id, _p0._0) ? _elm_lang$core$Native_Utils.update(
+						c,
+						{askDelete: true}) : _elm_lang$core$Native_Utils.update(
+						c,
+						{askDelete: false});
+				};
+				var cards = A2(_elm_lang$core$List$map, setAskDelete, model.cards);
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{cards: cards}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'DelIssueCardConfirm':
 				var cards = A2(
 					_elm_lang$core$List$filter,
 					function (c) {
@@ -10714,6 +10736,22 @@ var _husio$scrumboard$Update$update = F2(
 					ctor: '_Tuple2',
 					_0: m,
 					_1: _husio$scrumboard$Update$sendStateSync(m)
+				};
+			default:
+				var cards = A2(
+					_elm_lang$core$List$map,
+					function (c) {
+						return _elm_lang$core$Native_Utils.update(
+							c,
+							{askDelete: false});
+					},
+					model.cards);
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{cards: cards}),
+					_1: _elm_lang$core$Platform_Cmd$none
 				};
 		}
 	});
@@ -10835,6 +10873,82 @@ var _husio$scrumboard$View$cardBorder = function (issue) {
 };
 var _husio$scrumboard$View$viewCard = F2(
 	function (dragId, card) {
+		var cardRemove = card.askDelete ? A2(
+			_elm_lang$html$Html$span,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('card-remove'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$span,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$class('card-remove-yes'),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(
+								_husio$scrumboard$Model$DelIssueCardConfirm(card.issue.id)),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$title('Confirm and remove from the board'),
+								_1: {ctor: '[]'}
+							}
+						}
+					},
+					{
+						ctor: '::',
+						_0: _husio$scrumboard$View$icon('trash-o'),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$span,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('card-remove-no'),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Events$onClick(
+									_husio$scrumboard$Model$DelIssueCardCancel(card.issue.id)),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$title('Cancel removing from the board'),
+									_1: {ctor: '[]'}
+								}
+							}
+						},
+						{
+							ctor: '::',
+							_0: _husio$scrumboard$View$icon('ban'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
+			}) : A2(
+			_elm_lang$html$Html$span,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Events$onClick(
+					_husio$scrumboard$Model$DelIssueCard(card.issue.id)),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('card-remove'),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$title('Remove from the board'),
+						_1: {ctor: '[]'}
+					}
+				}
+			},
+			{
+				ctor: '::',
+				_0: _husio$scrumboard$View$icon('trash-o'),
+				_1: {ctor: '[]'}
+			});
 		var assignees = A2(_elm_lang$core$List$map, _husio$scrumboard$View$viewAssignee, card.issue.assignees);
 		var labels = A2(_elm_lang$core$List$map, _husio$scrumboard$View$viewLabel, card.issue.labels);
 		var dropAttrs = A2(
@@ -10869,27 +10983,7 @@ var _husio$scrumboard$View$viewCard = F2(
 			attrs,
 			{
 				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$span,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Events$onClick(
-							_husio$scrumboard$Model$DelIssueCard(card.issue.id)),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('card-remove'),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$title('Remove from the board'),
-								_1: {ctor: '[]'}
-							}
-						}
-					},
-					{
-						ctor: '::',
-						_0: _husio$scrumboard$View$icon('trash-o'),
-						_1: {ctor: '[]'}
-					}),
+				_0: cardRemove,
 				_1: {
 					ctor: '::',
 					_0: A2(

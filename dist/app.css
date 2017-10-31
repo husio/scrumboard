@@ -93,6 +93,22 @@ a {
 	cursor: pointer;
 }
 
+.card-remove-yes {
+	visibility: visible;
+	color: #AC2E2E;
+	background: #F7F7F7;
+	padding: 10px 5px;
+	cursor: pointer;
+}
+
+.card-remove-no {
+	visibility: visible;
+	color: #0085D5;
+	background: #F7F7F7;
+	padding: 10px 5px;
+	cursor: pointer;
+}
+
 
 .card-title {
 	font-weight: bold;

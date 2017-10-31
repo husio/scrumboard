@@ -59,14 +59,12 @@ func (s *subSnapshot) Broadcast(data []byte) error {
 	rc := s.rp.Get()
 	defer rc.Close()
 
-	if _, err := rc.Do("SET", s.key, data, "EX", expirationSec); err != nil {
+	if _, err := rc.Do("SET", s.key, data); err != nil {
 		log.Printf("cannot create snapshot: %s", err)
 	}
 
 	return s.sub.Broadcast(data)
 }
-
-const expirationSec = 60 * 60 * 24 * 7 // 7 days
 
 func (s subSnapshot) Close() error {
 	return s.sub.Close()
